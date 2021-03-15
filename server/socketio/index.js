@@ -1,5 +1,9 @@
-//const first
-//const second
+//----- PRIVREMENO -----
+const rooms = [
+    {name: 'alpha'},
+    {name: 'beta'},
+    {name: 'gamma'}
+]
 module.exports = (io) => {
     console.log('Initializing socket-io!!!')
     io.on('connection', (socket) => {
@@ -27,6 +31,10 @@ module.exports = (io) => {
                 iceCandidate: candidate
             }
             socket.broadcast.emit('message', message)
+        })
+
+        socket.on('get-rooms', () => {
+            socket.emit('rooms', rooms)
         })
 
         socket.on('disconnect', function() {
