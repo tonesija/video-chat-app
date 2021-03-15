@@ -11,8 +11,6 @@
 </template>
 
 <script>
-import io from 'socket.io-client'
-
 import TestService from '../services/testService'
 
 import RTCService from '../util/RTCService'
@@ -46,7 +44,7 @@ export default {
       },
       pc: null,
 
-      socket: io(process.env.VUE_APP_ENV_BASE_URL)
+      socket: null
     }
   },
 
@@ -57,6 +55,8 @@ export default {
   },
 
   created: function() {
+    this.socket = this.$store.state.socket
+
     navigator.mediaDevices.getUserMedia(this.constraints)
     .then(stream => {
         console.log('Got MediaStream:', stream)

@@ -33,8 +33,22 @@ module.exports = (io) => {
             socket.broadcast.emit('message', message)
         })
 
+        socket.on('join-room', ({roomName, username}) => {
+            console.log(username + ' joined room ' + roomName)
+            socket.join(roomName)
+            io.to(roomName).emit('user-joined-room', username)
+        })
+
         socket.on('get-rooms', () => {
             socket.emit('rooms', rooms)
+        })
+
+        socket.on('disconnecting', function() {
+            for(let room of socket.rooms){
+                io.to(room).emit('user-disconected')
+            }
+            console.log('Scoket is disconecting!')
+            console.log('Affected rooms: ', socket.rooms)
         })
 
         socket.on('disconnect', function() {

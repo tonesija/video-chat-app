@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import VideoChat from '../views/VideoChat.vue'
+import Room from '../views/Room.vue'
+
 
 Vue.use(VueRouter)
 
@@ -15,6 +17,11 @@ const routes = [
     path: '/video-chat',
     name: 'VideoChatTest',
     component: VideoChat
+  },
+  {
+    path: '/room/:roomName',
+    name: 'Room',
+    component: Room
   },
   {
     path: '/about',
