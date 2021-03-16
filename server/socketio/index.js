@@ -1,9 +1,12 @@
-//----- PRIVREMENO -----
+const {userJoin, getUser, userLeave, getRoomUsers} = require('./users')
+
+// --- PRIVREMENO ---
 const rooms = [
-    {name: 'alpha'},
-    {name: 'beta'},
-    {name: 'gamma'}
+    'alpha',
+    'beta',
+    'gamma'
 ]
+
 module.exports = (io) => {
     console.log('Initializing socket-io!!!')
     io.on('connection', (socket) => {
@@ -33,26 +36,50 @@ module.exports = (io) => {
             socket.broadcast.emit('message', message)
         })
 
+
+        // --- ROOM LOGIC ---
         socket.on('join-room', ({roomName, username}) => {
             console.log(username + ' joined room ' + roomName)
+            
+            const user = userJoin(socket.id, username, roomName)
             socket.join(roomName)
-            io.to(roomName).emit('user-joined-room', username)
+
+            socket.broadcast.to(roomName).emit('user-joined-room', user)
+
+            socket.broadcast.to(roomName).emit('room-users', getRoomUsers(roomName))
         })
 
         socket.on('get-rooms', () => {
             socket.emit('rooms', rooms)
         })
 
-        socket.on('disconnecting', function() {
-            for(let room of socket.rooms){
-                io.to(room).emit('user-disconected')
+
+        socket.on('leave-room', room => {
+            const user = userLeave(socket.id)
+
+            if(user) {
+                io.to(user.room).emit('user-disconnected', user)
+                socket.broadcast.to(roomName).emit('room-users', getRoomUsers(user.room))
+                console.log(user.username + ' left room ' + room)
+            } else {
+                console.log('Someone disconnected!')
             }
-            console.log('Scoket is disconecting!')
-            console.log('Affected rooms: ', socket.rooms)
+
+            
+        })
+        socket.on('disconnect', function() {
+            const user = userLeave(socket.id)
+
+            if(user) {
+                io.to(user.room).emit('user-disconnected', user)
+                socket.broadcast.to(roomName).emit('room-users', getRoomUsers(user.room))
+                console.log(user.username + ' disconnect!')
+            } else {
+                console.log('Someone disconnected!')
+            }
         })
 
-        socket.on('disconnect', function() {
-            console.log('Got disconnect!')
-        })
+        //--- ROOM CALL SIGNALING LOGIC ---
+        
     })
 }
