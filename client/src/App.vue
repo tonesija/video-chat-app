@@ -12,12 +12,9 @@
 </template>
 
 <script>
-import io from 'socket.io-client'
-
 export default {
   data() {
     return {
-      socket: io(process.env.VUE_APP_ENV_BASE_URL)
     }
   },
 
@@ -26,7 +23,6 @@ export default {
   },
 
   created: function() {
-    this.$store.commit('setSocket', this.socket)
   }
 }
 </script>

@@ -14,7 +14,6 @@
 import TestService from '../services/testService'
 
 import RTCService from '../util/RTCService'
-
 export default {
   name: 'Home',
 
@@ -42,21 +41,55 @@ export default {
           }
         ]
       },
-      pc: null,
+      pc: null
+    }
+  },
 
-      socket: null
+  sockets: {
+    message: async function(message) {
+      if (message.offer) {
+        console.log('Got an offer')
+        this.pc.setRemoteDescription(new RTCSessionDescription(message.offer));
+        const answer = await this.pc.createAnswer();
+        
+        await this.pc.setLocalDescription(answer)
+        this.$socket.emit('answer', answer)
+      } else if (message.iceCandidate) {
+        console.log('Got and ice candidate through message')
+        try {
+        console.log('Addin ice candidate to peer connection')
+        await this.pc.addIceCandidate(message.iceCandidate);
+        } catch (e) {
+        console.error('Error adding received ice candidate', e);
+        }
+      }
     }
   },
 
   methods: {
     async makeCall() {
-      RTCService.makeCall(this.pc, this.socket)
+      //RTCServickeCall(this.pc, this.socket)
+      console.log('Making call')
+      this.$socket.$subscribe('message', async message => {
+        if (message.answer) {
+          console.log('Got an answer')
+          const remoteDesc = new RTCSessionDescription(message.answer)
+          await this.pc.setRemoteDescription(remoteDesc)
+        }
+      })
+
+      var mediaConstraints = {
+      'offerToReceiveAudio': true,
+      'offerToReceiveVideo': true    
+      };
+
+      const offer = await this.pc.createOffer(mediaConstraints)
+      await this.pc.setLocalDescription(offer)
+      this.$socket.client.emit('offer', offer)
     }
   },
 
   created: function() {
-    this.socket = this.$store.state.socket
-
     navigator.mediaDevices.getUserMedia(this.constraints)
     .then(stream => {
         console.log('Got MediaStream:', stream)
@@ -73,20 +106,13 @@ export default {
 
     //const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
     this.pc = new RTCPeerConnection(this.iceConfiguration);
-    
-
-    RTCService.onMessageOffer(this.pc, this.socket)
-
-
+  
+    RTCService.onMessageOffer(this.pc, this.$socket.client)
     // Listen for local ICE candidates on the local RTCPeerConnection
-    RTCService.onIceCandidate(this.pc, this.socket)
+    RTCService.onIceCandidate(this.pc, this.$socket.client)
 
     // Listen for connectionstatechange on the local RTCPeerConnection
     RTCService.oneIceConnectionChange(this.pc)
-
-
-    // Listen for remote ICE candidates and add them to the local RTCPeerConnection
-    RTCService.onMessageIceCandidate(this.pc, this.socket)
 
     //get the remote stream
     this.remoteVideoStream = new MediaStream()
@@ -102,9 +128,8 @@ export default {
     })
   },
 
-
-
-  components: {
+  destroyed: function() {
+    this.$socket.$unsubscribe('message')
   }
 }
 </script>

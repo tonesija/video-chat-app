@@ -20,6 +20,8 @@
 </template>
 
 <script>
+import io from 'socket.io-client'
+
 export default {
   name: 'Home',
 
@@ -41,7 +43,7 @@ export default {
   },
 
   created: function() {
-    this.socket = this.$store.state.socket
+    this.socket = io(process.env.VUE_APP_ENV_BASE_URL)
 
     this.socket.on('rooms', async rooms => {
       this.rooms = rooms

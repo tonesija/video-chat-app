@@ -12,28 +12,28 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log('new connection')
 
-        socket.on('offer', offer => {
-            console.log('Offer event')
+        socket.on('offer', ({offer, username}) => {
+            console.log('Offer event', username)
             let message = {
                 offer: offer
             }
-            socket.broadcast.emit('message', message)
+            socket.broadcast.emit('message', {message, username})
         })
 
-        socket.on('answer', answer => {
-            console.log('Answer event')
+        socket.on('answer', ({answer, username}) => {
+            console.log('Answer event', username)
             let message = {
                 answer: answer
             }
-            socket.broadcast.emit('message', message)
+            socket.broadcast.emit('message', {message, username})
         })
 
-        socket.on('new-ice-candidate', candidate => {
+        socket.on('new-ice-candidate', ({candidate, username}) => {
             console.log('New ICE candidate event')
             let message = {
                 iceCandidate: candidate
             }
-            socket.broadcast.emit('message', message)
+            socket.broadcast.emit('message', {message, username})
         })
 
 
@@ -44,22 +44,28 @@ module.exports = (io) => {
             const user = userJoin(socket.id, username, roomName)
             socket.join(roomName)
 
-            socket.broadcast.to(roomName).emit('user-joined-room', user)
+            socket.broadcast.to(roomName).emit('userJoinedRoom', user)
 
-            socket.broadcast.to(roomName).emit('room-users', getRoomUsers(roomName))
+            //socket.broadcast.to(roomName).emit('roomUsers', getRoomUsers(roomName))
+            io.to(roomName).emit('roomUsers', getRoomUsers(roomName))
         })
 
         socket.on('get-rooms', () => {
             socket.emit('rooms', rooms)
         })
+        
+        socket.on('get-room-users', (room) => {
+            let users = getRoomUsers(room)
 
+            socket.broadcast.to(room).emit('roomUsers', users)
+        })
 
         socket.on('leave-room', room => {
             const user = userLeave(socket.id)
 
             if(user) {
-                io.to(user.room).emit('user-disconnected', user)
-                socket.broadcast.to(roomName).emit('room-users', getRoomUsers(user.room))
+                io.to(user.room).emit('userDisconnected', user)
+                socket.broadcast.to(room).emit('roomUsers', getRoomUsers(user.room))
                 console.log(user.username + ' left room ' + room)
             } else {
                 console.log('Someone disconnected!')
@@ -69,10 +75,11 @@ module.exports = (io) => {
         })
         socket.on('disconnect', function() {
             const user = userLeave(socket.id)
+            console.log('user:', user)
 
             if(user) {
-                io.to(user.room).emit('user-disconnected', user)
-                socket.broadcast.to(roomName).emit('room-users', getRoomUsers(user.room))
+                io.to(user.room).emit('userDisconnected', user)
+                socket.broadcast.to(user.room).emit('roomUsers', getRoomUsers(user.room))
                 console.log(user.username + ' disconnect!')
             } else {
                 console.log('Someone disconnected!')

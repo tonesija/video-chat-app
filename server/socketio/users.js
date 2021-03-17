@@ -20,14 +20,16 @@ function userLeave(id) {
     username: users[id].username,
     room: users[id].room
   }
-  users[id] = null
+  delete users[id]
   console.log(user + ' aaaaa')
   return user
 }
 
 function getRoomUsers(room) {
   const toReturn = []
+  console.log
   for(let id in users){
+    console.log('id: ', id)
     console.log(users[id])
     if(users[id].room === room) toReturn.push(users[id])
   }
