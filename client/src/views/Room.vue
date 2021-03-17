@@ -33,8 +33,9 @@
 </template>
 
 <script>
+import RTCService from '../util/RTCService'
 export default {
-  name: 'Home',
+  name: 'Room',
 
   data: ()=> {
     return {
@@ -73,97 +74,58 @@ export default {
     async joinCall(){
       //create pcs map
       this.pcs = new Map()
-      for(let user of this.users){
-        if(user.username != this.localUsername){
-          this.pcs.set(user.username, new RTCPeerConnection(this.iceConfiguration))
-        }
-      }
       this.inCall = true
 
-      //ask for camera and mic access
-      navigator.mediaDevices.getUserMedia(this.constraints)
-      .then(stream => {
-          console.log('Got MediaStream:', stream)
-          this.videoStream = stream;
-          //add the tracks to RTCPeerConnection
-          this.videoStream.getTracks().forEach(track => {
-            console.log('Adding tracks to peer connection!')
-            for(let pc of this.pcs.values()){
-              pc.addTrack(track, this.videoStream)
+      this.$socket.client.emit('user-joined-call', {username: this.localUsername})
+
+
+
+      //--- on offer ---
+      this.$socket.$subscribe('message', async ({message}) => {
+        if(message.offer){
+          console.log('Got an offer from', message.sender)
+          let pc = new RTCPeerConnection(this.iceConfiguration)
+          RTCService.setLocalStream(pc, this.videoStream)
+          RTCService.myOnTrack(message.sender, pc, this.remoteVideoStreams)
+
+
+          RTCService.setupNewPc(pc, this.localUsername, this.$socket.client)
+          //setup new pc
+          /*pc.addEventListener('icecandidate', event => {
+            console.log('Got an ice candidate: ', event.candidate)
+            if (event.candidate) {
+                this.$socket.client.emit('new-ice-candidate', {candidate: event.candidate,
+                  sender: this.localUsername, reciver: message.sender})
+            }
+          })*/
+
+          //onMessageIceCandidate
+          this.$socket.$subscribe('message', async ({message}) => {
+            if (message.iceCandidate && message.reciver === this.localUsername) {
+                console.log('Got and ice candidate through message')
+              try {
+                console.log('Addin ice candidate to peer connection')
+                await pc.addIceCandidate(message.iceCandidate);
+              } catch (e) {
+                console.error('Error adding received ice candidate', e);
+              }
             }
           })
-      })
-      .catch(error => {
-          console.error('Error accessing media devices.', error)
-      })
-
-
-
-      //get the remote stream
-      for(let username of this.pcs.keys()){
-        let newMediaStream = new MediaStream()
-        let remoteStream = {username: username, mediaStream: newMediaStream}
-        this.remoteVideoStreams.push(remoteStream)
-        this.pcs.get(username).addEventListener('track', event => {
-          console.log('Got a track from ', username)
-          newMediaStream.addTrack(event.track, newMediaStream)
           
+          RTCService.myOnConnChange(pc)
 
-        })
-      }
+          await pc.setRemoteDescription(new RTCSessionDescription(message.offer))
+          this.pcs.set(message.sender, pc)
 
-      console.log('pcs: ', this.pcs.values())
-      //ice candidates
-      for(let username of this.pcs.keys()) {
-        this.pcs.get(username).addEventListener('icecandidate', event => {
-          if(event.candidate){
-            console.log('ice c: ', event)
-            this.$socket.client.emit('new-ice-candidate', {candidate: event.candidate, sender: this.localUsername, reciver: username})
-          }
-        })
-      }
+          const answer = await pc.createAnswer()
 
-
-      //ice connection change
-      for(let pc of this.pcs.values()){
-        pc.addEventListener('iceconnectionstatechange', event => {
-          if(pc.iceConnectionState === 'connected'){
-            console.log('Peers connected ', event)
-            console.log('Remote streams: ', this.remoteVideoStreams)
-          }
-        })
-      }
-
-
-
-
-      this.$socket.$subscribe('message', async ({message}) => {
-        if (message.answer && message.reciver === this.localUsername) {
-          console.log('Got an answer from ', message.sender)
-          const remoteDesc = new RTCSessionDescription(message.answer)
-          //quick fix before upgrading the signaling (correct users get correct signals) 
-          
-          await this.pcs.get(message.sender).setRemoteDescription(remoteDesc)
-        
-          
+          await pc.setLocalDescription(answer)
+          this.$socket.client.emit('answer', {answer: answer,
+            sender: this.localUsername, reciver: message.sender})
         }
       })
-
-      var mediaConstraints = {
-      'offerToReceiveAudio': true,
-      'offerToReceiveVideo': true    
-      };
-
-      //TODO dirty hack
-      setTimeout(async() => {
-        for(let username of this.pcs.keys()){
-        console.log('Creating offer')
-        const offer = await this.pcs.get(username).createOffer(mediaConstraints)
-        await this.pcs.get(username).setLocalDescription(offer)
-        this.$socket.client.emit('offer', {offer: offer, sender: this.localUsername, reciver: username})
-      }
-      }, 1000)
-
+      
+      
     }
   },
 
@@ -178,32 +140,68 @@ export default {
       console.log('Updated users in the room', users)
       this.users = users
     },
-
-    message: async function({message}) {
+    userJoinedCall: async function(user) {
       if(!this.inCall) return
-      console.log(message, message.sender)
-      if(message.offer && message.reciver === this.localUsername){
-        //popup join call
-        console.log('Got an offer from ', message.sender)
-        this.pcs.get(message.sender).setRemoteDescription(new RTCSessionDescription(message.offer))
-        const answer = await this.pcs.get(message.sender).createAnswer()
+      let pc = new RTCPeerConnection(this.iceConfiguration)
+      RTCService.setLocalStream(pc, this.videoStream)
+      this.pcs.set(user.username, pc)
 
-        await this.pcs.get(message.sender).setLocalDescription(answer)
-        this.$socket.client.emit('answer', {answer: answer, sender: this.localUsername, reciver: message.sender})
-      } else if(message.iceCandidate && message.reciver === this.localUsername) {
-        try {
-          console.log('Addin ice candidate to peer connection from '+message.sender+' for '+message.reciver)
-          await this.pcs.get(message.sender).addIceCandidate(message.iceCandidate);
-        } catch (e) {
-          console.error('Error adding received ice candidate', e);
+      RTCService.myOnTrack(user.username, pc, this.remoteVideoStreams)
+
+      RTCService.setupNewPc(pc, this.localUsername, user.username, this.$socket.client)
+
+      this.$socket.$subscribe('message', async ({message}) => {
+        if (message.iceCandidate && message.reciver === this.localUsername) {
+            console.log('Got and ice candidate through message')
+          try {
+            console.log('Addin ice candidate to peer connection')
+            await pc.addIceCandidate(message.iceCandidate);
+          } catch (e) {
+            console.error('Error adding received ice candidate', e)
+          }
         }
+      })
+      
+      
+      RTCService.myOnConnChange(pc)
+
+
+      //create offer
+      var mediaConstraints = {
+        'offerToReceiveAudio': true,
+        'offerToReceiveVideo': true    
       }
+      console.log('Creating offer')
+      const offer = await pc.createOffer(mediaConstraints)
+      
+      //set local and remote descriptions
+      await pc.setLocalDescription(offer)
+      this.$socket.client.emit('offer', {offer: offer, sender: this.localUsername, reciver: user.username})
+      this.$socket.$subscribe('message', async ({message}) => {
+        if (message.answer && message.reciver === this.localUsername) {
+          console.log('Got an answer from ', message.sender)
+          const remoteDesc = new RTCSessionDescription(message.answer)
+          //quick fix before upgrading the signaling (correct users get correct signals) 
+          await pc.setRemoteDescription(remoteDesc)
+        }
+      })
+
+
     }
   },
 
   created: function() {
     this.room = this.$route.params.roomName
     this.localUsername = this.$store.state.username
+
+    //ask for camera and mic access
+    navigator.mediaDevices.getUserMedia(this.constraints)
+    .then(stream => {
+        this.videoStream = stream
+    })
+    .catch(error => {
+        console.error('Error accessing media devices.', error)
+    })
 
     this.$socket.client.emit('join-room', {roomName: this.room, username: this.$store.state.username})
   },

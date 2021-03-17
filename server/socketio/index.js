@@ -33,7 +33,7 @@ module.exports = (io) => {
         })
 
         socket.on('new-ice-candidate', ({candidate, sender, reciver}) => {
-            console.log('New ICE candidate event')
+            console.log('New ICE candidate event', sender, reciver)
             let message = {
                 iceCandidate: candidate,
                 sender: sender,
@@ -54,6 +54,12 @@ module.exports = (io) => {
 
             //socket.broadcast.to(roomName).emit('roomUsers', getRoomUsers(roomName))
             io.to(roomName).emit('roomUsers', getRoomUsers(roomName))
+        })
+
+        socket.on('user-joined-call', ({username}) => {
+            console.log('User joined call: ', username)
+            const user = getUser(socket.id)
+            socket.broadcast.emit('userJoinedCall', user)
         })
 
         socket.on('get-rooms', () => {
