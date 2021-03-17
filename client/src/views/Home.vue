@@ -20,8 +20,6 @@
 </template>
 
 <script>
-import io from 'socket.io-client'
-
 export default {
   name: 'Home',
 
@@ -41,19 +39,18 @@ export default {
       this.$store.commit('setUsername', this.username)
     }
   },
+  
+  sockets: {
+    rooms: function(rooms) {
+      this.rooms = rooms
+    }
+  },
 
   created: function() {
-    this.socket = io(process.env.VUE_APP_ENV_BASE_URL)
-
-    this.socket.on('rooms', async rooms => {
-      this.rooms = rooms
-    })
-
-    this.socket.emit('get-rooms')
+    this.$socket.client.emit('get-rooms')
   },
 
   destroyed: function() {
-    this.socket.off('rooms')
   },
 
 

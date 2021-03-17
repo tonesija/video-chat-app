@@ -114,12 +114,11 @@ export default {
 
       console.log('pcs: ', this.pcs.values())
       //ice candidates
-      for(let pc of this.pcs.values()) {
-        console.log('pc: ', pc)
-        pc.addEventListener('icecandidate', event => {
+      for(let username of this.pcs.keys()) {
+        this.pcs.get(username).addEventListener('icecandidate', event => {
           if(event.candidate){
             console.log('ice c: ', event)
-            this.$socket.client.emit('new-ice-candidate', {candidate: event.candidate, username: this.localUsername})
+            this.$socket.client.emit('new-ice-candidate', {candidate: event.candidate, sender: this.localUsername, reciver: username})
           }
         })
       }
@@ -138,16 +137,14 @@ export default {
 
 
 
-      this.$socket.$subscribe('message', async ({message, username}) => {
-        if (message.answer) {
-          console.log('Got an answer from ', username)
+      this.$socket.$subscribe('message', async ({message}) => {
+        if (message.answer && message.reciver === this.localUsername) {
+          console.log('Got an answer from ', message.sender)
           const remoteDesc = new RTCSessionDescription(message.answer)
           //quick fix before upgrading the signaling (correct users get correct signals) 
-          try {
-            await this.pcs.get(username).setRemoteDescription(remoteDesc)
-          } catch(e){
-            //ignore
-          }
+          
+          await this.pcs.get(message.sender).setRemoteDescription(remoteDesc)
+        
           
         }
       })
@@ -159,11 +156,11 @@ export default {
 
       //TODO dirty hack
       setTimeout(async() => {
-        for(let pc of this.pcs.values()){
+        for(let username of this.pcs.keys()){
         console.log('Creating offer')
-        const offer = await pc.createOffer(mediaConstraints)
-        await pc.setLocalDescription(offer)
-        this.$socket.client.emit('offer', {offer: offer, username: this.localUsername})
+        const offer = await this.pcs.get(username).createOffer(mediaConstraints)
+        await this.pcs.get(username).setLocalDescription(offer)
+        this.$socket.client.emit('offer', {offer: offer, sender: this.localUsername, reciver: username})
       }
       }, 1000)
 
@@ -182,22 +179,21 @@ export default {
       this.users = users
     },
 
-    message: async function({message, username}) {
+    message: async function({message}) {
       if(!this.inCall) return
-      console.log(message, username)
-      if(message.offer){
+      console.log(message, message.sender)
+      if(message.offer && message.reciver === this.localUsername){
         //popup join call
-        console.log('Got an offer from ', username)
-        this.pcs.get(username).setRemoteDescription(new RTCSessionDescription(message.offer))
-        const answer = await this.pcs.get(username).createAnswer()
+        console.log('Got an offer from ', message.sender)
+        this.pcs.get(message.sender).setRemoteDescription(new RTCSessionDescription(message.offer))
+        const answer = await this.pcs.get(message.sender).createAnswer()
 
-        await this.pcs.get(username).setLocalDescription(answer)
-        this.$socket.client.emit('answer', {answer: answer, username: this.localUsername})
-      } else if(message.iceCandidate) {
-        console.log('Got a new icecandidate through message ', username)
+        await this.pcs.get(message.sender).setLocalDescription(answer)
+        this.$socket.client.emit('answer', {answer: answer, sender: this.localUsername, reciver: message.sender})
+      } else if(message.iceCandidate && message.reciver === this.localUsername) {
         try {
-          console.log('Addin ice candidate to peer connection')
-          await this.pcs.get(username).addIceCandidate(message.iceCandidate);
+          console.log('Addin ice candidate to peer connection from '+message.sender+' for '+message.reciver)
+          await this.pcs.get(message.sender).addIceCandidate(message.iceCandidate);
         } catch (e) {
           console.error('Error adding received ice candidate', e);
         }

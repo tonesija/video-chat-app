@@ -12,28 +12,34 @@ module.exports = (io) => {
     io.on('connection', (socket) => {
         console.log('new connection')
 
-        socket.on('offer', ({offer, username}) => {
-            console.log('Offer event', username)
+        socket.on('offer', ({offer, sender, reciver}) => {
+            console.log('Offer event', sender, reciver)
             let message = {
-                offer: offer
+                offer: offer,
+                sender: sender,
+                reciver: reciver
             }
-            socket.broadcast.emit('message', {message, username})
+            socket.broadcast.emit('message', {message})
         })
 
-        socket.on('answer', ({answer, username}) => {
-            console.log('Answer event', username)
+        socket.on('answer', ({answer, sender, reciver}) => {
+            console.log('Answer event', sender, reciver)
             let message = {
-                answer: answer
+                answer: answer,
+                sender: sender,
+                reciver: reciver
             }
-            socket.broadcast.emit('message', {message, username})
+            socket.broadcast.emit('message', {message})
         })
 
-        socket.on('new-ice-candidate', ({candidate, username}) => {
+        socket.on('new-ice-candidate', ({candidate, sender, reciver}) => {
             console.log('New ICE candidate event')
             let message = {
-                iceCandidate: candidate
+                iceCandidate: candidate,
+                sender: sender,
+                reciver: reciver
             }
-            socket.broadcast.emit('message', {message, username})
+            socket.broadcast.emit('message', {message})
         })
 
 
