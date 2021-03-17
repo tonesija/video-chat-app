@@ -78,44 +78,47 @@ export default {
 
       this.$socket.client.emit('user-joined-call', {username: this.localUsername})
 
+      //onMessageIceCandidate
+      this.$socket.$subscribe('message', async ({message}) => {
+        if (message.iceCandidate && message.reciver === this.localUsername) {
+          try {
+            console.log('Addin ice candidate to peer connection, sender: '+message.sender+', reciver: '+message.reciver)
+            await this.pcs.get(message.sender).addIceCandidate(message.iceCandidate);
+          } catch (e) {
+            console.error('Error adding received ice candidate', e);
+          }
+        }
+      })
+      
+      //--- on answer ---
+      this.$socket.$subscribe('message', async ({message}) => {
+        if (message.answer && message.reciver === this.localUsername) {
+          console.log('Got an answer from ', message.sender)
+          const remoteDesc = new RTCSessionDescription(message.answer)
+          //quick fix before upgrading the signaling (correct users get correct signals) 
+          if(!this.pcs.get(message.sender).currentRemoteDescription)
+            await this.pcs.get(message.sender).setRemoteDescription(remoteDesc)
+        }
+      })
+
 
 
       //--- on offer ---
       this.$socket.$subscribe('message', async ({message}) => {
-        if(message.offer){
+        if(message.offer && message.reciver === this.localUsername){
           console.log('Got an offer from', message.sender)
           let pc = new RTCPeerConnection(this.iceConfiguration)
+          this.pcs.set(message.sender, pc)
+
           RTCService.setLocalStream(pc, this.videoStream)
           RTCService.myOnTrack(message.sender, pc, this.remoteVideoStreams)
+          RTCService.setupNewPc(pc, this.localUsername, message.sender, this.$socket.client)
 
-
-          RTCService.setupNewPc(pc, this.localUsername, this.$socket.client)
-          //setup new pc
-          /*pc.addEventListener('icecandidate', event => {
-            console.log('Got an ice candidate: ', event.candidate)
-            if (event.candidate) {
-                this.$socket.client.emit('new-ice-candidate', {candidate: event.candidate,
-                  sender: this.localUsername, reciver: message.sender})
-            }
-          })*/
-
-          //onMessageIceCandidate
-          this.$socket.$subscribe('message', async ({message}) => {
-            if (message.iceCandidate && message.reciver === this.localUsername) {
-                console.log('Got and ice candidate through message')
-              try {
-                console.log('Addin ice candidate to peer connection')
-                await pc.addIceCandidate(message.iceCandidate);
-              } catch (e) {
-                console.error('Error adding received ice candidate', e);
-              }
-            }
-          })
+          
           
           RTCService.myOnConnChange(pc)
 
           await pc.setRemoteDescription(new RTCSessionDescription(message.offer))
-          this.pcs.set(message.sender, pc)
 
           const answer = await pc.createAnswer()
 
@@ -124,7 +127,6 @@ export default {
             sender: this.localUsername, reciver: message.sender})
         }
       })
-      
       
     }
   },
@@ -149,22 +151,8 @@ export default {
       RTCService.myOnTrack(user.username, pc, this.remoteVideoStreams)
 
       RTCService.setupNewPc(pc, this.localUsername, user.username, this.$socket.client)
-
-      this.$socket.$subscribe('message', async ({message}) => {
-        if (message.iceCandidate && message.reciver === this.localUsername) {
-            console.log('Got and ice candidate through message')
-          try {
-            console.log('Addin ice candidate to peer connection')
-            await pc.addIceCandidate(message.iceCandidate);
-          } catch (e) {
-            console.error('Error adding received ice candidate', e)
-          }
-        }
-      })
-      
       
       RTCService.myOnConnChange(pc)
-
 
       //create offer
       var mediaConstraints = {
@@ -177,16 +165,6 @@ export default {
       //set local and remote descriptions
       await pc.setLocalDescription(offer)
       this.$socket.client.emit('offer', {offer: offer, sender: this.localUsername, reciver: user.username})
-      this.$socket.$subscribe('message', async ({message}) => {
-        if (message.answer && message.reciver === this.localUsername) {
-          console.log('Got an answer from ', message.sender)
-          const remoteDesc = new RTCSessionDescription(message.answer)
-          //quick fix before upgrading the signaling (correct users get correct signals) 
-          await pc.setRemoteDescription(remoteDesc)
-        }
-      })
-
-
     }
   },
 

@@ -72,14 +72,16 @@ function onTrack(pc, remoteVideoStream){
 }
 
 function setupNewPc(pc, sender, reciver, socket){
-  pc.addEventListener('icecandidate', event => {
-    console.log('Got an ice candidate: ', event.candidate)
+  pc.onicecandidate = function(event){
+    console.log('Got an ice candidate for: ', reciver)
+    console.log('pcstop', pc.stop)
     if (event.candidate) {
         socket.emit('new-ice-candidate', {candidate: event.candidate,
           sender: sender, reciver: reciver})
     }
-  })
+  }
 }
+
 
 function myOnTrack(reciver, pc, remoteVideoStreams){
   //get the remote stream
@@ -102,6 +104,7 @@ function myOnConnChange(pc){
     console.log('Connection changed: ', pc.iceConnectionState)
     if(pc.iceConnectionState === 'connected'){
       console.log('Peers connected!!!', event)
+      pc.onicecandidate = null
     }
   })
 }
