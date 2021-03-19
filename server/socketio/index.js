@@ -7,11 +7,22 @@ const rooms = [
     'gamma'
 ]
 
+
+//socket io emit cheetsheet:
+//https://socket.io/docs/v3/emit-cheatsheet/index.html
 module.exports = (io) => {
     console.log('Initializing socket-io!!!')
     io.on('connection', (socket) => {
         console.log('new connection')
 
+        //--- general logic ---
+        socket.on('user-logged-in', ({creds}) => {
+            console.log(`User logged in: ${creds.username}`)
+            console.log(`Socket id: ${socket.id}`)
+        })
+
+
+        //--- WebRTC signaling ---
         socket.on('offer', ({offer, sender, reciver}) => {
             console.log('Offer event', sender, reciver)
             let message = {
@@ -43,7 +54,7 @@ module.exports = (io) => {
         })
 
 
-        // --- ROOM LOGIC ---
+        // --- room logic ---
         socket.on('join-room', ({roomName, username}) => {
             console.log(username + ' joined room ' + roomName)
             
@@ -82,8 +93,6 @@ module.exports = (io) => {
             } else {
                 console.log('Someone disconnected!')
             }
-
-            
         })
         socket.on('disconnect', function() {
             const user = userLeave(socket.id)

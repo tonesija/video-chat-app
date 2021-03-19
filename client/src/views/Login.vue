@@ -89,7 +89,7 @@ export default {
         })).data
 
         //postavi korisnika u vuex
-        this.$store.commit('setUser', {
+        this.$store.dispatch('setUser', {
           username: data.user.username,
           email: data.user.email
         })

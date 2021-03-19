@@ -15,21 +15,6 @@
             <v-icon right>mdi-logout</v-icon>
         </v-btn>
     </v-app-bar>
-
-    <v-navigation-drawer light v-model="drawer" app class="primary">
-        <v-list>
-            <v-list-item router to="/about">
-                <v-list-item-action>
-                    <v-icon color="white">mdi-view-dashboard</v-icon>
-                </v-list-item-action>
-                <v-list-item-content>
-                    <v-list-item-title class="white--text">
-                        Dashboard
-                    </v-list-item-title>
-                </v-list-item-content>
-            </v-list-item>
-        </v-list> 
-    </v-navigation-drawer>
 </div>
 
 </template>
@@ -38,7 +23,6 @@
     export default {
         data() {
             return {
-                drawer: false
             }
         }
     }

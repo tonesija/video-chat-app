@@ -26,9 +26,7 @@ export default new Vuex.Store({
   actions: {
     setUser({commit}, creds) {
       commit('setUser', creds)
-
-      //TODO emit event
-      //this._vm.$socket.emit('someEvent', someData)
+      this._vm.$socket.client.emit('user-logged-in', {creds})
     }
   },
   modules: {
