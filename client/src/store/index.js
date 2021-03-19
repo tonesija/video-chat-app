@@ -5,16 +5,30 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    username: null
+    username: null,
+    email: null,
+    isLoggedIn: false
   },
   mutations: {
-    setUsername(state, username) {
-      state.username = username
+    setUser(state, creds) {
+      if(creds) {
+        state.isLoggedIn = true
+        state.username = creds.username
+        state.email = creds.email
+      } else {
+        state.isLoggedIn = false
+        state.username = null
+        state.email = null
+      }
+
     }
   },
   actions: {
-    setUsername({commit}, username) {
-      commit('setUsername', username)
+    setUser({commit}, creds) {
+      commit('setUser', creds)
+
+      //TODO emit event
+      //this._vm.$socket.emit('someEvent', someData)
     }
   },
   modules: {

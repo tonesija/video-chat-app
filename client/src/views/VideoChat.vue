@@ -11,8 +11,6 @@
 </template>
 
 <script>
-import TestService from '../services/testService'
-
 import RTCService from '../util/RTCService'
 export default {
   name: 'Home',
@@ -120,12 +118,6 @@ export default {
   },
 
   mounted: function() {
-    TestService.test().then(res => {
-      console.log('Test results: ', res.data)
-    })
-    .catch(err => {
-      console.log('Test error: ', err)
-    })
   },
 
   destroyed: function() {

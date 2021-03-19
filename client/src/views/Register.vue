@@ -20,12 +20,23 @@
 
           <v-text-field
             v-model="password"
+            type="password"
             label="Lozinka"
             :rules="passwordRules"
             required
           ></v-text-field>
         </v-container>
       </v-form>
+      <v-alert
+        border="left"
+        color="red lighten-2"
+        v-show="errorMsg"
+        dense
+        type="error"
+        outlined
+      >
+        {{ errorMsg }}
+      </v-alert>
 
       <v-container>
         <v-btn
@@ -53,6 +64,7 @@
 </template>
 
 <script>
+import authServ from '../services/authenticationService'
 export default {
   name: 'Register',
 
@@ -62,6 +74,8 @@ export default {
       username: null,
       email: null,
       password: null,
+
+      errorMsg: null,
 
       nameRules: [
         v => !!v || 'Korisničko ime je obavezno'
@@ -80,7 +94,24 @@ export default {
 
   methods: {
     async register() {
+      this.errorMsg = null
+      try {
+        let data = (await authServ.register({
+          username: this.username,
+          email: this.email,
+          password: this.password
+        })).data
 
+        //postavi korisnika u vuex
+        this.$store.commit('setUser', {
+          username: data.user.username,
+          email: data.user.email
+        })
+
+        //spremi token u browser
+      } catch (e) {
+        this.errorMsg = e.response.data.message
+      }
     },
 
     goToLogin() {
