@@ -5,7 +5,7 @@ const socketio = require('socket.io')
 const serveStatic = require("serve-static")
 const path = require('path')
 
-
+const {sequelize} = require("./models")
 
 const app = express()
 
@@ -34,5 +34,8 @@ app.use(cors())
 require('./routes')(app)
 
 let port = require('./config').PORT
-server.listen(port)
-console.log("Server started on port: ", port)
+sequelize.sync({force: true}).then(() => {
+    server.listen(port)
+    console.log("Server started on port: ", port)
+})
+

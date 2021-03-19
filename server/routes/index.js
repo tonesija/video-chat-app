@@ -1,7 +1,10 @@
-module.exports = (app) => {
-    app.get('/test', function(req, res) {
-        console.log('Test endpoint!')
-        res.send("Dobro je")
-    })
+const UserController = require('../controllers/UserController')
 
+module.exports = (app) => {
+    app.post('/register',
+        UserController.register
+    )
+    app.post('/login',
+        UserController.login
+    )
 }
