@@ -1,21 +1,20 @@
 <template>
   <div class="home">
-    <v-list dense>
+    <v-container>
+      <v-list dense>
         <v-list-item v-for="room in rooms" :key="room"
           router :to="'/room/' + room">
             <v-list-item-action>
-                <v-icon color="white">mdi-plus</v-icon>
+                <v-icon color="">mdi-plus</v-icon>
             </v-list-item-action>
             <v-list-item-content>
-                <v-list-item-title class="white--text caption">
+                <v-list-item-title class=" caption">
                     {{ room }}
                 </v-list-item-title>
             </v-list-item-content>
         </v-list-item>
-    </v-list>
-
-    <v-text-field v-model="username"></v-text-field>
-    <v-btn @click="setUsername">Set username</v-btn>
+      </v-list>
+    </v-container>
   </div>
 </template>
 
@@ -34,14 +33,12 @@ export default {
   },
 
   methods: {
-    setUsername() {
-      console.log('Setting username: ' + this.username)
-      this.$store.commit('setUsername', this.username)
-    }
+
   },
   
   sockets: {
     rooms: function(rooms) {
+      console.log('rooms: ', rooms)
       this.rooms = rooms
     }
   },

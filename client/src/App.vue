@@ -4,7 +4,7 @@
     <v-main class="mx-10 mb-5">
       <v-layout row class="mt-0">
         <v-flex sm3 md2 class="hidden-xs-only blue">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Vel saepe veniam quos dicta vero! Distinctio fugit, ullam nesciunt eius odit quos nobis quibusdam perspiciatis, nam unde, blanditiis magnam temporibus. Maxime?</p>
+          <Sidebar></Sidebar>
         </v-flex>
 
         <v-flex xs12 sm9 md10>
@@ -18,6 +18,7 @@
 
 <script>
 import Navbar from './components/Navbar'
+import Sidebar from './components/Sidebar'
 
 import authServ from './services/authenticationService'
 export default {
@@ -54,7 +55,8 @@ export default {
   },
 
   components: {
-    Navbar
+    Navbar,
+    Sidebar
   }
 }
 </script>
