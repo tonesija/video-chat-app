@@ -10,9 +10,49 @@
             </span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn text color="gray" @click="signOut">
-            <span>Sign out</span>
-            <v-icon right>mdi-logout</v-icon>
+        <v-menu offset-y v-if="this.$store.state.isLoggedIn"
+            rounded="lg">
+            <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                v-bind="attrs"
+                v-on="on"
+                icon
+                >
+                <v-icon>mdi-menu</v-icon>
+                </v-btn>
+            </template>
+            <v-list>
+                <v-list-item router to="/settings">
+                    <v-list-item-action>
+                        <v-icon>mdi-cog</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-title>
+                        Postavke
+                    </v-list-item-title>
+                </v-list-item>
+
+                <v-list-item @click="signOut">
+                    <v-list-item-action>
+                        <v-icon>mdi-logout</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-title>
+                        Odjavi se
+                    </v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </v-menu>
+
+        <v-btn color="primary darken-1" @click="signOut"
+        v-show="!this.$store.state.isLoggedIn"
+        router to="/register">
+            <span>Registriraj se</span>
+            <v-icon right>mdi-account-arrow-right</v-icon>
+        </v-btn>
+        <v-btn text color="gray" @click="signOut"
+        v-show="!this.$store.state.isLoggedIn"
+        router to="/login">
+            <span>Prijavi se</span>
+            <v-icon right>mdi-login</v-icon>
         </v-btn>
     </v-app-bar>
 </div>
