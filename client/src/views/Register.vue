@@ -1,6 +1,6 @@
 <template>
   <div class="register">
-    <v-container class="my-5">
+    <v-container>
       <p class="primary--text text--darken-4 display-1">Registracija</p>
       <v-form v-model="valid">
         <v-container>
@@ -104,8 +104,9 @@ export default {
 
         //postavi korisnika u vuex
         this.$store.dispatch('setUser', {
-          username: data.user.username,
-          email: data.user.email
+          creds: {username: data.user.username,
+          email: data.user.email},
+          token: data.token
         })
 
         //spremi token u browser

@@ -6,11 +6,11 @@
         </v-btn>
         <v-toolbar-title class="text-uppercase grey--text">
             <span class="font-weight-light">
-              {{$store.state.username}}
+                {{$store.state.username}}
             </span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn text color="gray">
+        <v-btn text color="gray" @click="signOut">
             <span>Sign out</span>
             <v-icon right>mdi-logout</v-icon>
         </v-btn>
@@ -23,6 +23,17 @@
     export default {
         data() {
             return {
+            }
+        },
+
+        methods: {
+            signOut(){
+                this.$store.dispatch('signOut', {
+                    username: this.$store.state.username,
+                    email: this.$store.state.email
+                })
+
+                //TODO push router
             }
         }
     }

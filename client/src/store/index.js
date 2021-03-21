@@ -24,9 +24,21 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    setUser({commit}, creds) {
+    setUser({commit}, {creds, token}) {
       commit('setUser', creds)
+
+      //store the token
+      localStorage.setItem('token', token)
+
+      //emit event
       this._vm.$socket.client.emit('user-logged-in', {creds})
+    },
+    signOut({commit}, {creds}) {
+      commit('setUser', null)
+
+      localStorage.removeItem('token')
+
+      this._vm.$socket.client.emit('user-logged-out', {creds})
     }
   },
   modules: {

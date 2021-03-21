@@ -7,5 +7,9 @@ export default {
 
   async login(creds){
     return api().post('/login', creds)
+  },
+
+  async automaticLogin(token){
+    return api().post('/automaticLogin', token)
   }
 }

@@ -87,5 +87,28 @@ module.exports = {
     } catch (e) {
       sendError(res, 'Neočekivana greška.', 500)
     }
+  },
+
+  async automaticLogin (req, res) {
+    let token = req.body.token
+
+    try {
+      console.log('token: ', token)
+      let user = jwtVerifyUser(token)
+
+      if(user){
+        sendResponse(res, {
+          user: user,
+          token: token
+        })
+        return
+      } else {
+        sendError(res, 'Greška u automatskoj autentifikaciji.', 400)
+        return
+      }
+    } catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
   }
 }
