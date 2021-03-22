@@ -6,8 +6,7 @@ import Room from '../views/Room.vue'
 import Register from '../views/Register'
 import Login from '../views/Login'
 import Index from '../views/Index.vue'
-
-
+import Chat from '../views/Chat.vue'
 
 
 Vue.use(VueRouter)
@@ -22,6 +21,11 @@ const routes = [
     path: '/rooms',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/chat/:username',
+    name: 'Chat',
+    component: Chat
   },
   {
     path: '/video-chat',

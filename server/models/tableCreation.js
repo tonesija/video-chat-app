@@ -14,10 +14,22 @@ module.exports = (sequelize, DataTypes) => {
 
   const Friends = sequelize.define('Friends')
 
+  
+  const ChatMessage = sequelize.define('ChatMessage', {
+    content: {
+      type: DataTypes.STRING
+    }
+  })
+
 
   //------ DEFINIRANJE VEZA ------
 
   User.belongsToMany(User, {through: Friends, as: 'Friend', foreignKey: 'username'})
+  
+  ChatMessage.belongsTo(User, {as: 'user1'})
+  ChatMessage.belongsTo(User, {as: 'user2'})
+
+  
   /*User.hasOne(Doctor, {foreignKey: 'userId'})
   User.hasOne(CloseContact, {foreignKey: 'userId', as: 'User'})
   User.hasMany(Messages, {as: 'Messages', foreignKey: 'userId'})
@@ -36,6 +48,7 @@ module.exports = (sequelize, DataTypes) => {
   //------ STAVLJANJE U EXPORT POLJE ------
   const tables = []
   tables.push(User)
+  tables.push(ChatMessage)
 
 
   return tables

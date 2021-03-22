@@ -1,4 +1,6 @@
 const UserController = require('../controllers/UserController')
+const ChatController = require('../controllers/ChatController')
+
 
 module.exports = (app) => {
     app.post('/register',
@@ -16,5 +18,12 @@ module.exports = (app) => {
     )
     app.post('/getFriends',
         UserController.getFriends
+    )
+
+    app.post('/getMessages',
+        ChatController.getMessages
+    )
+    app.post('/sendMessage',
+        ChatController.sendMessage
     )
 }

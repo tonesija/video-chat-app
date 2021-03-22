@@ -1,4 +1,4 @@
-const {userJoin, getUser, userLeave, getRoomUsers} = require('./users')
+const {userJoin, getUser, getUserId, userLeave, getRoomUsers} = require('./users')
 
 // --- PRIVREMENO ---
 const rooms = [
@@ -13,13 +13,16 @@ const rooms = [
 module.exports = (io) => {
     console.log('Initializing socket-io!!!')
     io.on('connection', (socket) => {
-        console.log('new connection')
+        console.log('new connection')        
 
         //--- general logic ---
         socket.on('user-logged-in', ({creds}) => {
             console.log(`User logged in: ${creds.username}`)
             console.log(`Socket id: ${socket.id}`)
+
+            userJoin(socket.id, creds.username, null)
         })
+
 
 
         //--- WebRTC signaling ---
@@ -51,6 +54,18 @@ module.exports = (io) => {
                 reciver: reciver
             }
             socket.broadcast.emit('message', {message})
+        })
+
+        // --- private chat logic ---
+        socket.on('new-message', ({username, msg}) =>{
+            let reciver = getUserId(username)
+            if(reciver){
+                console.log('Sending new msg to ', reciver)
+                io.to(reciver).emit('newMessage', msg)
+            } else {
+                console.log('Failed to find a reciver.')
+            }
+            
         })
 
 
@@ -99,8 +114,6 @@ module.exports = (io) => {
             console.log('user:', user)
 
             if(user) {
-                io.to(user.room).emit('userDisconnected', user)
-                socket.broadcast.to(user.room).emit('roomUsers', getRoomUsers(user.room))
                 console.log(user.username + ' disconnect!')
             } else {
                 console.log('Someone disconnected!')

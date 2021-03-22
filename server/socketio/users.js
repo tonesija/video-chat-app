@@ -13,6 +13,16 @@ function getUser(id) {
   return users[id]
 }
 
+function getUserId(name) {
+  console.log('getting user id')
+  for(let k in users){
+    console.log(users[k])
+    if(users[k].username === name)
+      return k
+  }
+  return null
+}
+
 function userLeave(id) {
   if(users[id] == null) return null
   let user = {
@@ -21,16 +31,12 @@ function userLeave(id) {
     room: users[id].room
   }
   delete users[id]
-  console.log(user + ' aaaaa')
   return user
 }
 
 function getRoomUsers(room) {
   const toReturn = []
-  console.log
   for(let id in users){
-    console.log('id: ', id)
-    console.log(users[id])
     if(users[id].room === room) toReturn.push(users[id])
   }
   return toReturn
@@ -39,6 +45,7 @@ function getRoomUsers(room) {
 module.exports = {
   userJoin,
   getUser,
+  getUserId,
   userLeave,
   getRoomUsers
 }

@@ -8,7 +8,7 @@
             <v-list class="primary pa-0 ma-0">
                 <v-list-item v-for="f in friends" :key="f.username"
                 class="pa-0 ma-0"
-                router :to="'/chat?user='+f.username">
+                router :to="'/chat/'+f.username">
                     <v-list-item-action>
                         <v-icon>mdi-circle</v-icon>
                     </v-list-item-action>
