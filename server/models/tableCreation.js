@@ -12,8 +12,12 @@ module.exports = (sequelize, DataTypes) => {
     password: DataTypes.STRING
   }, {timestamps: false})
 
+  const Friends = sequelize.define('Friends')
+
 
   //------ DEFINIRANJE VEZA ------
+
+  User.belongsToMany(User, {through: Friends, as: 'Friend', foreignKey: 'username'})
   /*User.hasOne(Doctor, {foreignKey: 'userId'})
   User.hasOne(CloseContact, {foreignKey: 'userId', as: 'User'})
   User.hasMany(Messages, {as: 'Messages', foreignKey: 'userId'})

@@ -8,20 +8,20 @@
                 rounded="lg">
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
-                    color="primary"
-                    v-bind="attrs"
+                    color="primary darken-2"
+                    v-bind="{attrs: attrs, size: size}"
                     v-on="on"
                     small
                     >
                     Dodaj prijatelja
                     </v-btn>
                 </template>
-                <v-container class="primary">
+                <v-container class="primary lighten-1">
                     <v-layout row class="py-2 px-2" justify-space-between align-center>
                         <v-flex xs9>
-                            <v-text-field class="primary lighten-2"
+                            <v-text-field class=""
                                 dense placeholder="Korisničko ime"
-                                rounded single-line v-model="newFriendUsername">
+                                single-line v-model="newFriendUsername">
 
                             </v-text-field>
                         </v-flex>
@@ -39,7 +39,8 @@
                             border="left"
                             v-show="message"
                             dense
-                            type="success"
+                            :type="alertType"
+                            class="caption"
                         >
                             {{ message }}
                         </v-alert>
@@ -53,17 +54,37 @@
 </template>
 
 <script>
+import FService from '../services/friendsService'
     export default {
         data() {
             return {
                 newFriendUsername: null,
-                message: null
+                message: null,
+                alertType: null
+            }
+        },
+
+
+        computed: {
+            size () {
+                const size = {xs:'x-small',sm:'small',lg:'large',xl:'x-large'}[this.$vuetify.breakpoint.name];
+                return size ? { [size]: true } : {}
             }
         },
 
         methods: {
             async addFriend(){
-                this.message = 'Zahtjev je poslan.'
+                try {
+                    let data = (await FService.addFriend({
+                        token: localStorage.getItem('token'),
+                        otherUsername: this.newFriendUsername
+                    })).data
+                    this.alertType = 'success'
+                    this.message = data.message
+                } catch (e){
+                    this.alertType = 'error'
+                    this.message = e.response.data.message
+                }
                 setTimeout(() => {
                     this.message = null
                 }, 1600)

@@ -31,7 +31,7 @@
                     </v-list-item-title>
                 </v-list-item>
 
-                <v-list-item @click="signOut">
+                <v-list-item @click="signOut" router to='/'>
                     <v-list-item-action>
                         <v-icon>mdi-logout</v-icon>
                     </v-list-item-action>
@@ -44,13 +44,13 @@
 
         <v-btn color="primary darken-1" @click="signOut"
         v-show="!this.$store.state.isLoggedIn"
-        router to="/register">
+        router to="/register" v-bind="size">
             <span>Registriraj se</span>
             <v-icon right>mdi-account-arrow-right</v-icon>
         </v-btn>
         <v-btn text color="gray" @click="signOut"
         v-show="!this.$store.state.isLoggedIn"
-        router to="/login">
+        router to="/login" v-bind="size">
             <span>Prijavi se</span>
             <v-icon right>mdi-login</v-icon>
         </v-btn>
@@ -66,14 +66,20 @@
             }
         },
 
+
+        computed: {
+            size () {
+                const size = {xs:'x-small',sm:'small',lg:'large',xl:'x-large'}[this.$vuetify.breakpoint.name];
+                return size ? { [size]: true } : {}
+            }
+        },
+
         methods: {
             signOut(){
                 this.$store.dispatch('signOut', {
                     username: this.$store.state.username,
                     email: this.$store.state.email
                 })
-
-                //TODO push router
             }
         }
     }

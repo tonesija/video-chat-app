@@ -5,6 +5,8 @@ import VideoChat from '../views/VideoChat.vue'
 import Room from '../views/Room.vue'
 import Register from '../views/Register'
 import Login from '../views/Login'
+import Index from '../views/Index.vue'
+
 
 
 
@@ -13,6 +15,11 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
+    name: 'Index',
+    component: Index
+  },
+  {
+    path: '/rooms',
     name: 'Home',
     component: Home
   },

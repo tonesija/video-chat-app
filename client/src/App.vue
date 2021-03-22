@@ -1,16 +1,19 @@
 <template>
   <v-app>
     <Navbar></Navbar>
-    <v-main class="mx-10 mb-5">
-      <v-layout row class="mt-0">
-        <v-flex sm3 md2 class="hidden-xs-only blue">
-          <Sidebar></Sidebar>
-        </v-flex>
+    <v-main class="">
+      <v-card height="90vh" class="mx-10 pl-0" tile raised>
+        <v-layout row class="mt-0 height100">
+          <v-flex sm3 md2 class="hidden-xs-only primary">
+            <Sidebar></Sidebar>
+          </v-flex>
 
-        <v-flex xs12 sm9 md10>
-          <router-view></router-view>
-        </v-flex>
-      </v-layout>
+          <v-flex xs12 sm9 md10>
+            <router-view></router-view>
+          </v-flex>
+        </v-layout>
+      </v-card>
+
     </v-main>
 
   </v-app>
@@ -28,6 +31,8 @@ export default {
     return {
     }
   },
+
+
 
   methods: {
     async automaticLogin(){
@@ -63,4 +68,10 @@ export default {
 
 
 <style>
+.height100 {
+  height: 100%;
+}
+.v-application {
+    background-color: #d3eaf8 !important;
+}
 </style>

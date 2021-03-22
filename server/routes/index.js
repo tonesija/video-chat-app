@@ -10,4 +10,8 @@ module.exports = (app) => {
     app.post('/automaticLogin',
         UserController.automaticLogin
     )
+
+    app.post('/addFriend',
+        UserController.addFriend
+    )
 }

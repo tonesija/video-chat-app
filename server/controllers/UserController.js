@@ -110,5 +110,66 @@ module.exports = {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }
+  },
+
+  async addFriend (req, res) {
+    let token = req.body.token
+    let otherUsername = req.body.otherUsername
+    
+    if(!token){
+      sendError(res, 'Greška u autentifikaciji.', 400)
+      return
+    }
+    
+    try {
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+
+      if(user.username === otherUsername){
+        sendError(res, 'Ne možete dodati sebe za prijatelja.', 400)
+        return
+      }
+
+      user = await User.findOne({
+        where: {
+          username: user.username
+        },
+        include: {
+          model: User,
+          as: 'Friend'
+        }
+      })
+      let friends = user.Friend
+
+      for(let friend of friends){
+        if(friend.username === otherUsername){
+          sendError(res, 'Taj korisnik vam je već prijatelj.', 400)
+          return
+        }
+      }
+
+      let otherUser = await User.findOne({
+        where: {
+          username: otherUsername
+        }
+      })
+
+      if(otherUser){
+        user.addFriend(otherUser)
+        sendResponse(res, {
+          message: `${otherUsername} je sada vaš prijatelj.`
+        })
+      } else {
+        sendError(res, 'Taj korisnik ne postoji.', 400)
+      }
+      
+    } catch(e) {
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
   }
 }
