@@ -9,16 +9,15 @@ module.exports = {
         database: 'VideoChatAppDB',
         user: 'postgres',
         password: '',
-        dialectOptions: {
-          ssl: {
-              rejectUnauthorized: false
-          }
-        },
         options: {
           dialect: 'postgres',
+          ssl: {
+            rejectUnauthorized: false
+          },
           dialectOptions: {
             ssl: {
-                rejectUnauthorized: false
+              require: true,
+              rejectUnauthorized: false
             }
           },
           protocol: 'postgres',
