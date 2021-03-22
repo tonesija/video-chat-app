@@ -1,9 +1,9 @@
 <template>
   <v-app>
     <Navbar></Navbar>
-    <v-main class="">
-      <v-card height="90vh" class="mx-10 pl-0" tile raised>
-        <v-layout row class="mt-0 height100">
+    <v-main class="mx-10">
+      <v-card height="90vh" class="px-0" tile raised>
+        <v-layout row class="mt-0 mx-0 height100">
           <v-flex sm3 md2 class="hidden-xs-only primary">
             <Sidebar></Sidebar>
           </v-flex>

@@ -134,7 +134,11 @@ module.exports = {
             user2Id: {
               [Op.or]: [sender.id, reciver.id]
             }
-          }
+          },
+          include: [{
+            model: User,
+            as: 'user1'
+          }]
         })
         
         sendResponse(res, {

@@ -129,6 +129,10 @@ import FService from '../services/friendsService'
             }
         },
 
+        created: function() {
+            this.getFriends()
+        },
+
 
         //on route change
         watch:{

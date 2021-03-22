@@ -1,29 +1,30 @@
 <template>
-  <div class="home">
-    <v-container class="pl-0 pt-0">
-      <v-toolbar class="secondary">
-        <v-toolbar-title>
-          {{otherUsername}}
-        </v-toolbar-title>
+  <div class="home height100">
+    <v-toolbar class="secondary">
+      <v-toolbar-title>
+        {{otherUsername}}
+      </v-toolbar-title>
 
-        <v-spacer></v-spacer>
+      <v-spacer></v-spacer>
 
-        <v-toolbar-items>
-          <v-btn icon>
-            <v-icon>mdi-phone</v-icon>
-          </v-btn>
-        </v-toolbar-items>
-      </v-toolbar>
+      <v-toolbar-items>
+        <v-btn icon>
+          <v-icon>mdi-phone</v-icon>
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-container class="px-3 pt-4 mx-0" style="max-height: 100%">
+      
+      <ChatMsgs style="max-height: 700px" ref="chat-msgs"
+    class="overflow-y-auto" :messages="messages"></ChatMsgs>
 
-      <ChatMsgs :messages="messages"></ChatMsgs>
-
-
-      <v-text-field v-model="newMessage">
+        
+    
+      <v-text-field v-model="newMessage" class="">
         <v-btn slot="append" @click="sendMessage">
           <v-icon>mdi-send</v-icon>
         </v-btn>
       </v-text-field>
-      
     
       
     </v-container>
@@ -47,6 +48,11 @@ export default {
 
   methods: {
     async sendMessage(){
+      if(!this.newMessage) return
+      this.newMessage = this.newMessage.trim()
+      if(this.newMessage === '') return
+      
+
       let payload = {
         content: this.newMessage,
         senderToken: localStorage.getItem('token'),
@@ -55,12 +61,16 @@ export default {
 
       let msg = {
         content: this.newMessage,
-        sender: this.$store.state.username,
+        user1: {
+          username: this.$store.state.username
+        },
         //TODO kako da postavim id? (mogu nakon slanja poruke httpom)
         //cekati i oda je poslati socketom
-        id: Math.random() * 10000000
+        id: Math.random() * 10000000,
+        createdAt: new Date()
       }
       this.messages.push(msg)
+      this.scrollToBottom('chat-msgs')
 
       this.$socket.client.emit('new-message', {
         username: this.otherUsername,
@@ -88,6 +98,7 @@ export default {
         console.log(data)
 
         this.messages = data.chatMessages
+        this.scrollToBottom('chat-msgs')
       }catch(e){
         console.log(e)
       }
@@ -96,6 +107,18 @@ export default {
     onLoad(){
       this.otherUsername = this.$route.params.username
       this.getMessages()
+    },
+    onKeyPress(e) {
+      if(e.key === 'Enter'){
+        this.sendMessage()
+      }
+    },
+
+    scrollToBottom(ref){
+      setTimeout(() => {
+        this.$refs[ref].$el.scrollTop = this.$refs[ref].$el.scrollHeight
+      }, 50)
+      
     }
   },
   
@@ -103,11 +126,14 @@ export default {
     newMessage: async function(msg) {
       console.log('dobijena poruka preko socketa: ', msg)
       this.messages.push(msg)
+      this.scrollToBottom('chat-msgs')
     }
   },
 
   created: function() {
     this.onLoad()
+
+    document.addEventListener('keydown', this.onKeyPress)
   },
 
   //on route change
@@ -121,6 +147,7 @@ export default {
   },
 
   destroyed: function() {
+    document.removeEventListener('keydown', this.onKeyPress)
   },
 
 
@@ -132,5 +159,12 @@ export default {
 </script>
 
 <style scoped>
+.height100 {
+  height: 100%;
+}
 
+.message-sender {
+  position: absolute;
+  bottom: 0px;
+}
 </style>
