@@ -56,6 +56,42 @@ module.exports = (io) => {
             socket.broadcast.emit('message', {message})
         })
 
+        // --- 1 on 1 call signaling ---
+        socket.on('call-request', ({sender, reciver}) => {
+            console.log(`${sender} calling ${reciver}.`)
+            
+            //TODO provjeri jesu li prijatelji
+
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                io.to(reciverId).emit('callRequest', sender)
+            } else {
+                console.log('Failed to find a reciver.')
+            }
+        })
+
+        socket.on('call-accept', ({sender, reciver}) => {
+            console.log(`${sender} accepted ${reciver}'s call.`)
+
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                io.to(reciverId).emit('callAccept', sender)
+            } else {
+                console.log('Failed to find a reciver.')
+            }
+        })
+
+        socket.on('call-denied', ({sender, reciver}) => {
+            console.log(`${sender} denied ${reciver}'s call.`)
+
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                io.to(reciverId).emit('callDenied', sender)
+            } else {
+                console.log('Failed to find a reciver.')
+            }
+        })
+
         // --- private chat logic ---
         socket.on('new-message', ({username, msg}) =>{
             let reciver = getUserId(username)

@@ -1,13 +1,18 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+import router from '../router' // Vue router instance
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     username: null,
     email: null,
-    isLoggedIn: false
+    isLoggedIn: false,
+
+    inPrivateCall: false,
+    callee: null
   },
   mutations: {
     setUser(state, creds) {
@@ -20,7 +25,16 @@ export default new Vuex.Store({
         state.username = null
         state.email = null
       }
+    },
 
+    setCall(state, callee){
+      if(callee){
+        state.inPrivateCall = true
+        state.callee = callee
+      } else {
+        state.inPrivateCall = false
+        state.callee = null
+      }
     }
   },
   actions: {
@@ -39,6 +53,15 @@ export default new Vuex.Store({
       localStorage.removeItem('token')
 
       this._vm.$socket.client.emit('user-logged-out', {creds})
+    },
+
+    setPrivateCall({commit}, {callee}){
+      commit('setCall', callee)
+      
+      if(callee)
+        router.push('/call/'+callee)
+      else
+        router.push('/')
     }
   },
   modules: {

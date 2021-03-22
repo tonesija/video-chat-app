@@ -8,7 +8,7 @@
       <v-spacer></v-spacer>
 
       <v-toolbar-items>
-        <v-btn icon>
+        <v-btn icon @click="call">
           <v-icon>mdi-phone</v-icon>
         </v-btn>
       </v-toolbar-items>
@@ -104,6 +104,13 @@ export default {
       }
     },
 
+    call(){
+      this.$socket.client.emit('call-request', {
+        sender: this.$store.state.username,
+        reciver: this.otherUsername
+      })
+    },
+
     onLoad(){
       this.otherUsername = this.$route.params.username
       this.getMessages()
@@ -127,6 +134,18 @@ export default {
       console.log('dobijena poruka preko socketa: ', msg)
       this.messages.push(msg)
       this.scrollToBottom('chat-msgs')
+    },
+
+    callDenied: async function(sender) {
+      console.log('Poziv odbijen od ', sender)
+
+      //TODO
+    },
+
+    callAccept: async function(sender) {
+      console.log('Poziv prihvaćen od ', sender)
+
+      this.$store.dispatch('setPrivateCall', {callee: sender})
     }
   },
 

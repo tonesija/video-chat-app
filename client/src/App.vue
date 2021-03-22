@@ -14,6 +14,35 @@
         </v-layout>
       </v-card>
 
+      <v-dialog
+        v-model="call"
+        persistent
+        max-width="290"
+      >
+        <v-card>
+          <v-card-title class="headline">
+            {{ caller }} vas zove.
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="error"
+              text
+              @click="denyCall"
+            >
+              Poklopi
+            </v-btn>
+            <v-btn
+              color="success"
+              text
+              @click="acceptCall"
+            >
+              Odgovori
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
     </v-main>
 
   </v-app>
@@ -29,6 +58,8 @@ export default {
 
   data() {
     return {
+      call: false,
+      caller: null
     }
   },
 
@@ -52,6 +83,35 @@ export default {
           console.log(e)
         }
       }
+    },
+
+    acceptCall(){
+      this.call = false
+
+      this.$socket.client.emit('call-accept', {
+        sender: this.$store.state.username,
+        reciver: this.caller
+      })
+
+      this.$store.dispatch('setPrivateCall', {callee: this.caller})
+    },
+
+    denyCall(){
+      this.call = false
+
+      this.$socket.client.emit('call-denied', {
+        sender: this.$store.state.username,
+        reciver: this.caller
+      })
+
+      this.caller = null
+    }
+  },
+
+  sockets: {
+    async callRequest(sender) {
+      this.caller = sender
+      this.call = true
     }
   },
 
