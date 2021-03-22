@@ -159,7 +159,8 @@ module.exports = {
       })
 
       if(otherUser){
-        user.addFriend(otherUser)
+        await user.addFriend(otherUser)
+        await otherUser.addFriend(user)
         sendResponse(res, {
           message: `${otherUsername} je sada vaš prijatelj.`
         })
@@ -171,5 +172,43 @@ module.exports = {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }
+  },
+
+  async getFriends (req, res) {
+    let token = req.body.token
+    
+    if(!token){
+      sendError(res, 'Greška u autentifikaciji.', 400)
+      return
+    }
+    
+    try {
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+
+      user = await User.findOne({
+        where: {
+          username: user.username
+        },
+        include: {
+          model: User,
+          as: 'Friend'
+        }
+      })
+      let friends = user.Friend
+
+      sendResponse(res, {
+        friends: friends
+      })
+      
+    } catch(e) {
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
   }
+
 }

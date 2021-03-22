@@ -14,4 +14,7 @@ module.exports = (app) => {
     app.post('/addFriend',
         UserController.addFriend
     )
+    app.post('/getFriends',
+        UserController.getFriends
+    )
 }

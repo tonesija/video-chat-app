@@ -109,7 +109,7 @@ export default {
           token: data.token
         })
 
-        //spremi token u browser
+        this.$router.push('/')
       } catch (e) {
         this.errorMsg = e.response.data.message
       }

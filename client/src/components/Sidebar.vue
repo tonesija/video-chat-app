@@ -1,9 +1,25 @@
 <template>
     <v-container>
-            
-        <v-row align="center" justify="center">
-            <p>Online friends (TODO)</p>
+        <v-row align="center" justify="center" class="mt-4">
+            <p>Prijatelji</p>
+        </v-row>
 
+        <v-row align="center" justify="center" class="pa-0 ma-0">
+            <v-list class="primary pa-0 ma-0">
+                <v-list-item v-for="f in friends" :key="f.username"
+                class="pa-0 ma-0"
+                router :to="'/chat?user='+f.username">
+                    <v-list-item-action>
+                        <v-icon>mdi-circle</v-icon>
+                    </v-list-item-action>
+                    <v-list-item-title class="caption">
+                        {{ addThreeDots(f.username, 10) }}
+                    </v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </v-row>
+
+        <v-row align="center" justify="center">
             <v-menu offset-y :close-on-content-click="false"
                 rounded="lg">
                 <template v-slot:activator="{ on, attrs }">
@@ -60,7 +76,9 @@ import FService from '../services/friendsService'
             return {
                 newFriendUsername: null,
                 message: null,
-                alertType: null
+                alertType: null,
+
+                friends: []
             }
         },
 
@@ -81,6 +99,7 @@ import FService from '../services/friendsService'
                     })).data
                     this.alertType = 'success'
                     this.message = data.message
+                    this.getFriends()
                 } catch (e){
                     this.alertType = 'error'
                     this.message = e.response.data.message
@@ -89,7 +108,49 @@ import FService from '../services/friendsService'
                     this.message = null
                 }, 1600)
                 console.log(this.$store.state.username + ' dodaje ' + this.newFriendUsername)
+            }, 
+
+            async getFriends(){
+                try {
+                let data = (await FService.getFriends({
+                    token: localStorage.getItem('token')
+                })).data
+                    this.friends = data.friends
+                } catch(e){
+                    console.log(e)
+                }
+            },
+
+            addThreeDots(text, chars){
+                if(text.length > chars){
+                    text = text.substring(0, chars) + '...'
+                }
+                return text
+            }
+        },
+
+
+        //on route change
+        watch:{
+            $route (){
+                console.log('route changed')
+                if(this.$store.state.isLoggedIn){
+                    console.log('gettam friends')
+                    this.getFriends()
+                } else {
+                    this.friends = []
+                }
             }
         }
     }
 </script>
+
+<style scoped>
+    .text-overflow-dots{
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+        width:100px; 
+
+    }
+</style>

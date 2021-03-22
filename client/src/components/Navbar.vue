@@ -42,13 +42,13 @@
             </v-list>
         </v-menu>
 
-        <v-btn color="primary darken-1" @click="signOut"
+        <v-btn color="primary darken-1"
         v-show="!this.$store.state.isLoggedIn"
         router to="/register" v-bind="size">
             <span>Registriraj se</span>
             <v-icon right>mdi-account-arrow-right</v-icon>
         </v-btn>
-        <v-btn text color="gray" @click="signOut"
+        <v-btn text color="gray"
         v-show="!this.$store.state.isLoggedIn"
         router to="/login" v-bind="size">
             <span>Prijavi se</span>
@@ -80,6 +80,7 @@
                     username: this.$store.state.username,
                     email: this.$store.state.email
                 })
+                setTimeout(()=>location.reload(), 100)
             }
         }
     }
