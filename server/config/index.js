@@ -19,4 +19,5 @@ module.exports = {
           url: process.env.DATABASE_URL || "postgres://postgres:111111222@127.0.0.1:5432/VideoChatAppDB"
         }
       }
+      //
 }
