@@ -12,7 +12,8 @@ export default new Vuex.Store({
     isLoggedIn: false,
 
     inPrivateCall: false,
-    callee: null
+    callee: null,
+    caller: false
   },
   mutations: {
     setUser(state, creds) {
@@ -27,7 +28,7 @@ export default new Vuex.Store({
       }
     },
 
-    setCall(state, callee){
+    setCall(state, {callee, caller}){
       if(callee){
         state.inPrivateCall = true
         state.callee = callee
@@ -35,6 +36,7 @@ export default new Vuex.Store({
         state.inPrivateCall = false
         state.callee = null
       }
+      state.caller = caller
     }
   },
   actions: {
@@ -55,8 +57,8 @@ export default new Vuex.Store({
       this._vm.$socket.client.emit('user-logged-out', {creds})
     },
 
-    setPrivateCall({commit}, {callee}){
-      commit('setCall', callee)
+    setPrivateCall({commit}, {callee, caller}){
+      commit('setCall', {callee, caller})
       
       if(callee)
         router.push('/call/'+callee)

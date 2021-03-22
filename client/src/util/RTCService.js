@@ -31,11 +31,11 @@ function onMessageOffer(pc, socket){
   })
 }
 
-function onIceCandidate(pc, socket){
+function onIceCandidate(pc, socket, sender){
   pc.addEventListener('icecandidate', event => {
       console.log('Got an ice candidate: ', event.candidate)
       if (event.candidate) {
-          socket.emit('new-ice-candidate', event.candidate)
+          socket.emit('new-ice-candidate', {candidate: event.candidate, reciver: sender})
       }
   })
 }

@@ -145,7 +145,7 @@ export default {
     callAccept: async function(sender) {
       console.log('Poziv prihvaćen od ', sender)
 
-      this.$store.dispatch('setPrivateCall', {callee: sender})
+      this.$store.dispatch('setPrivateCall', {callee: sender, caller: true})
     }
   },
 

@@ -26,34 +26,45 @@ module.exports = (io) => {
 
 
         //--- WebRTC signaling ---
-        socket.on('offer', ({offer, sender, reciver}) => {
-            console.log('Offer event', sender, reciver)
-            let message = {
-                offer: offer,
-                sender: sender,
-                reciver: reciver
+        socket.on('offer', ({offer, reciver}) => {
+            console.log('Offer event', reciver)
+            
+
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                let message = {
+                    offer: offer
+                }
+                io.to(reciverId).emit('message', message)
+            } else {
+                console.log('Failed to find a reciver.')
             }
-            socket.broadcast.emit('message', {message})
         })
 
-        socket.on('answer', ({answer, sender, reciver}) => {
-            console.log('Answer event', sender, reciver)
-            let message = {
-                answer: answer,
-                sender: sender,
-                reciver: reciver
+        socket.on('answer', ({answer, reciver}) => {
+            console.log('Answer event', reciver)
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                let message = {
+                    answer: answer
+                }
+                io.to(reciverId).emit('message', message)
+            } else {
+                console.log('Failed to find a reciver.')
             }
-            socket.broadcast.emit('message', {message})
         })
 
-        socket.on('new-ice-candidate', ({candidate, sender, reciver}) => {
-            console.log('New ICE candidate event', sender, reciver)
-            let message = {
-                iceCandidate: candidate,
-                sender: sender,
-                reciver: reciver
+        socket.on('new-ice-candidate', ({candidate, reciver}) => {
+            console.log('New ICE candidate event', reciver)
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                let message = {
+                    candidate: candidate
+                }
+                io.to(reciverId).emit('message', message)
+            } else {
+                console.log('Failed to find a reciver.')
             }
-            socket.broadcast.emit('message', {message})
         })
 
         // --- 1 on 1 call signaling ---

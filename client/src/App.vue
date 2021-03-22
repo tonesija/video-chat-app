@@ -93,7 +93,7 @@ export default {
         reciver: this.caller
       })
 
-      this.$store.dispatch('setPrivateCall', {callee: this.caller})
+      this.$store.dispatch('setPrivateCall', {callee: this.caller, caller: false})
     },
 
     denyCall(){
