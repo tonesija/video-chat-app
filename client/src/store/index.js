@@ -62,8 +62,6 @@ export default new Vuex.Store({
       
       if(callee)
         router.push('/call/'+callee)
-      else
-        router.push('/')
     }
   },
   modules: {

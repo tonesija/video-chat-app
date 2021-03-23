@@ -1,13 +1,53 @@
 <template>
-  <div class="Call">
-    <p>{{$route.params.username}}</p>
+  <v-container class="Call height100">
+    <v-row align="center" justify="center">
+      <v-menu offset-y :close-on-content-click="false"
+      rounded="lg" bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <video :srcObject.prop="remoteVideoStream" autoplay 
+          playsinline :controls="false"
+          width="640" height="480"
+          v-bind="{attrs: attrs}"
+          v-on="on" :volume="0.0" ref="otherVideo"
+          >
+          </video>
+        </template>
+        <v-layout row justify-center class="primary lighten-3 px-2 pb-0 ma-0">
+          <v-flex class="pa-0 ma-0">
+            <p class="subtitle mb-0">{{ otherUser }}</p>
+            <v-slider v-model="volume" @change="changeVolume"
+            dense>
+            </v-slider>
+          </v-flex>
+        </v-layout>
+      </v-menu>
+    </v-row>
 
-    <video :srcObject.prop="videoStream" autoplay 
-    playsinline controls="false"></video>
 
-    <video :srcObject.prop="remoteVideoStream" autoplay 
-    playsinline controls="false"></video>
-  </div>
+    <v-row align="center" justify="center">
+      <v-menu offset-y :close-on-content-click="false"
+      rounded="lg" bottom>
+      <template v-slot:activator="{ on, attrs }">
+          <video :srcObject.prop="videoStream" autoplay 
+          playsinline  muted :controls="false"
+          width="300" height="260"
+          v-bind="{attrs: attrs}"
+          v-on="on"
+          >
+          </video>
+      </template>
+        <v-container class="primary lighten-3">
+          <p class="subtitle">{{ $store.state.username }}</p>
+        </v-container>
+      </v-menu>
+    </v-row>
+
+    <v-row align="end" justify="center">
+      <v-btn icon x-large @click="hangUp">
+        <v-icon x-large color="error">mdi-phone-hangup</v-icon>
+      </v-btn>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -42,7 +82,8 @@ export default {
       },
       pc: null,
 
-      otherUser: null
+      otherUser: null,
+      volume: 50
     }
   },
 
@@ -64,6 +105,12 @@ export default {
         console.error('Error adding received ice candidate', e);
         }
       }
+    }
+  },
+
+  computed: {
+    volumeAdj: function(){
+      return this.volume/100
     }
   },
 
@@ -104,6 +151,15 @@ export default {
           this.makeCall()
         }, 1200)
       }
+    },
+
+    changeVolume(){
+      console.log('changing vol to', this.volumeAdj)
+      this.$refs['otherVideo'].volume = this.volumeAdj
+    },
+
+    hangUp(){
+      this.$router.push('/chat/'+this.otherUser)
     }
 
   },
@@ -137,9 +193,12 @@ export default {
     this.$store.dispatch('setPrivateCall', {callee: null})
 
     this.$socket.client.off('message')
+
+    //turn off mic and camera
+    this.videoStream.getTracks().forEach(track => {
+      track.stop()
+    })
   },
-
-
 
   components: {
   }
