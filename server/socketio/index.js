@@ -81,6 +81,19 @@ module.exports = (io) => {
             }
         })
 
+        socket.on('abort-call-request', ({sender, reciver}) => {
+            console.log(`Aborting call to ${reciver}, from ${sender}.`)
+            
+            //TODO provjeri jesu li prijatelji
+
+            let reciverId = getUserId(reciver)
+            if(reciverId){
+                io.to(reciverId).emit('abortCallRequest', sender)
+            } else {
+                console.log('Failed to find a reciver.')
+            }
+        })
+
         socket.on('call-accept', ({sender, reciver}) => {
             console.log(`${sender} accepted ${reciver}'s call.`)
 

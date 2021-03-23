@@ -112,6 +112,11 @@ export default {
     async callRequest(sender) {
       this.caller = sender
       this.call = true
+    },
+    async abortCallRequest(sender){
+      console.log('Call aborted by ', sender)
+      this.caller = null
+      this.call = false
     }
   },
 

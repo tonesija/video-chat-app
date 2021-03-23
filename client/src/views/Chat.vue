@@ -25,6 +25,29 @@
           <v-icon>mdi-send</v-icon>
         </v-btn>
       </v-text-field>
+
+
+      <v-dialog
+        v-model="dialog"
+        persistent
+        max-width="290"
+      >
+        <v-card>
+          <v-card-title class="headline">
+            Čekam odgovor od {{otherUsername}}
+          </v-card-title>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="error"
+              text
+              @click="abortCallRequest"
+            >
+              Prekini poziv
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     
       
     </v-container>
@@ -42,7 +65,9 @@ export default {
     return {
       otherUsername: null,
       newMessage: null,
-      messages: []
+      messages: [],
+
+      dialog: false
     }
   },
 
@@ -109,6 +134,15 @@ export default {
         sender: this.$store.state.username,
         reciver: this.otherUsername
       })
+      this.dialog = true
+    },
+
+    abortCallRequest(){
+      this.dialog = false
+      this.$socket.client.emit('abort-call-request', {
+        reciver: this.otherUsername,
+        sender: this.$store.state.username
+      })
     },
 
     onLoad(){
@@ -139,11 +173,13 @@ export default {
     callDenied: async function(sender) {
       console.log('Poziv odbijen od ', sender)
 
-      //TODO
+      this.dialog = false
+      //TODO alert da je poziv odbijen
     },
 
     callAccept: async function(sender) {
       console.log('Poziv prihvaćen od ', sender)
+      this.dialog = false
 
       this.$store.dispatch('setPrivateCall', {callee: sender, caller: true})
     }

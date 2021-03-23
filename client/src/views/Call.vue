@@ -71,7 +71,7 @@ export default {
     async makeCall() {
       //RTCServickeCall(this.pc, this.socket)
       console.log('Making call')
-      this.$socket.$subscribe('message', async message => {
+      this.$socket.client.on('message', async message => {
         if (message.answer) {
           console.log('Got an answer')
           const remoteDesc = new RTCSessionDescription(message.answer)
@@ -86,12 +86,34 @@ export default {
       const offer = await this.pc.createOffer(mediaConstraints)
       await this.pc.setLocalDescription(offer)
       this.$socket.client.emit('offer', {offer: offer, reciver: this.otherUser})
+    },
+
+    setupPc(){
+      // Listen for local ICE candidates on the local RTCPeerConnection
+      RTCService.onIceCandidate(this.pc, this.$socket.client, this.otherUser)
+
+      // Listen for connectionstatechange on the local RTCPeerConnection
+      RTCService.oneIceConnectionChange(this.pc)
+
+      //get the remote stream
+      this.remoteVideoStream = new MediaStream()
+      RTCService.onTrack(this.pc, this.remoteVideoStream)
+
+      if(this.$store.state.caller){
+        setTimeout(() => {
+          this.makeCall()
+        }, 1200)
+      }
     }
 
   },
 
+  
+
   created: function() {
     this.otherUser = this.$route.params.username
+
+    this.pc = new RTCPeerConnection(this.iceConfiguration)
 
     navigator.mediaDevices.getUserMedia(this.constraints)
     .then(stream => {
@@ -102,33 +124,19 @@ export default {
           this.pc.addTrack(track, this.videoStream)
           console.log('Adding track to peer connection!')
         })
+
+        this.setupPc()
     })
     .catch(error => {
         console.error('Error accessing media devices.', error)
     })
-
-    this.pc = new RTCPeerConnection(this.iceConfiguration)
-
-    // Listen for local ICE candidates on the local RTCPeerConnection
-    RTCService.onIceCandidate(this.pc, this.$socket.client, this.otherUser)
-
-    // Listen for connectionstatechange on the local RTCPeerConnection
-    RTCService.oneIceConnectionChange(this.pc)
-
-    //get the remote stream
-    this.remoteVideoStream = new MediaStream()
-    RTCService.onTrack(this.pc, this.remoteVideoStream)
-
-    if(this.$store.state.caller){
-      this.makeCall()
-    }
   },
 
   destroyed: function() {
     //update vuex private call state
     this.$store.dispatch('setPrivateCall', {callee: null})
 
-    this.$socket.$unsubscribe('message')
+    this.$socket.client.off('message')
   },
 
 
