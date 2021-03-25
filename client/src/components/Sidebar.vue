@@ -69,9 +69,7 @@
     <v-container slot="append">
         <v-row justify="center">
             <p class="text-uppercase secondary--text subtitle">
-                    Video
-                <span class="font-weight-light">
-                    chat
+                    Video<span class="font-weight-light">chat
                 </span>
             </p>
         </v-row>

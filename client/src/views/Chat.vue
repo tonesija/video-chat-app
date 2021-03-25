@@ -18,13 +18,7 @@
         <ChatMsgs style="max-height: 650px" ref="chat-msgs"
           class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
         
-      <v-text-field v-model="newMessage" class=""
-        filled shaped height="75" dense @keydown="onPressKey">
-        <v-btn slot="append-outer"  @click="sendMessage" 
-          color="accent" fab>
-          <v-icon>mdi-send</v-icon>
-        </v-btn>
-      </v-text-field>
+      <ChatInput v-model="newMessage" @messageSent="sendMessage"></ChatInput>
 
 
       <v-dialog
@@ -56,8 +50,9 @@
 
 <script>
 import ChatMsgs from '../components/ChatMessages'
-
 import MsgServ from '../services/chatService'
+import ChatInput from '../components/ChatInput'
+
 export default {
   name: 'Home',
 
@@ -159,17 +154,11 @@ export default {
       this.otherUsername = this.$route.params.username
       this.getMessages()
     },
-    onPressKey(e) {
-      if(e.key === 'Enter'){
-        this.sendMessage()
-      }
-    },
 
     scrollToBottom(ref){
       setTimeout(() => {
         this.$refs[ref].$el.scrollTop = this.$refs[ref].$el.scrollHeight
       }, 50)
-      
     }
   },
   
@@ -221,7 +210,8 @@ export default {
 
 
   components: {
-    ChatMsgs
+    ChatMsgs,
+    ChatInput
   }
 }
 </script>

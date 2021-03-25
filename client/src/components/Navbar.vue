@@ -6,10 +6,7 @@
         </v-btn>
         <v-toolbar-title class="text-uppercase primary--text"
             router to="/">
-                Video
-            <span class="font-weight-light">
-                chat
-            </span>
+            Video<span class="font-weight-light">chat</span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
