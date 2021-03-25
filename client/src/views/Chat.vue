@@ -1,30 +1,31 @@
 <template>
   <div class="home height100">
-    <v-toolbar class="secondary">
-      <v-toolbar-title>
+    <v-toolbar class="primary">
+      <v-toolbar-title class="accent--text font-weight-bold">
         {{otherUsername}}
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
 
       <v-toolbar-items>
-        <v-btn icon @click="call">
-          <v-icon>mdi-phone</v-icon>
+        <v-btn icon @click="call" class="accent--text">
+          <v-icon large>mdi-phone</v-icon>
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
     <v-container class="px-3 pt-4 mx-0" style="max-height: 100%">
       
-      <ChatMsgs style="max-height: 700px" ref="chat-msgs"
-    class="overflow-y-auto" :messages="messages"></ChatMsgs>
+      <ChatMsgs style="max-height: 650px" ref="chat-msgs"
+    class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
 
         
-    
-      <v-text-field v-model="newMessage" class="">
-        <v-btn slot="append" @click="sendMessage">
+      <v-textarea v-model="newMessage" class=""
+        filled rounded dense height="78" @keydown="onPressKey">
+        <v-btn slot="append-outer" @click="sendMessage" 
+          color="accent" fab>
           <v-icon>mdi-send</v-icon>
         </v-btn>
-      </v-text-field>
+      </v-textarea>
 
 
       <v-dialog
@@ -149,7 +150,7 @@ export default {
       this.otherUsername = this.$route.params.username
       this.getMessages()
     },
-    onKeyPress(e) {
+    onPressKey(e) {
       if(e.key === 'Enter'){
         this.sendMessage()
       }
@@ -188,7 +189,7 @@ export default {
   created: function() {
     this.onLoad()
 
-    document.addEventListener('keydown', this.onKeyPress)
+    //document.addEventListener('keydown', this.onKeyPress)
   },
 
   //on route change

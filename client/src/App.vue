@@ -1,18 +1,8 @@
 <template>
   <v-app>
     <Navbar></Navbar>
-    <v-main class="mx-10">
-      <v-card height="90vh" class="px-0" tile raised>
-        <v-layout row class="mt-0 mx-0 height100">
-          <v-flex sm3 md2 class="hidden-xs-only primary">
-            <Sidebar></Sidebar>
-          </v-flex>
-
-          <v-flex xs12 sm9 md10>
-            <router-view></router-view>
-          </v-flex>
-        </v-layout>
-      </v-card>
+    <v-main>
+      <router-view class="px-10 white"></router-view>
 
       <v-dialog
         v-model="call"
@@ -50,7 +40,6 @@
 
 <script>
 import Navbar from './components/Navbar'
-import Sidebar from './components/Sidebar'
 
 import authServ from './services/authenticationService'
 export default {
@@ -125,8 +114,7 @@ export default {
   },
 
   components: {
-    Navbar,
-    Sidebar
+    Navbar
   }
 }
 </script>

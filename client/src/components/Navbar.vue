@@ -1,24 +1,34 @@
 <template>
 <div>
-    <v-app-bar text app>
-        <v-btn text @click="drawer = !drawer">
-            <v-icon class="grey--text">mdi-menu</v-icon>
+    <v-app-bar class="secondary" app>
+        <v-btn @click="drawer = !drawer" fab small class="accent mr-2">
+            <v-icon>mdi-menu</v-icon>
         </v-btn>
-        <v-toolbar-title class="text-uppercase grey--text">
+        <v-toolbar-title class="text-uppercase primary--text"
+            router to="/">
+                Video
             <span class="font-weight-light">
-                {{$store.state.username}}
+                chat
             </span>
         </v-toolbar-title>
         <v-spacer></v-spacer>
+
+        <v-toolbar-title class="primary--text font-weight-light mr-1">
+            <span>
+                {{$store.state.username}}
+            </span>
+        </v-toolbar-title>
+        
         <v-menu offset-y v-if="this.$store.state.isLoggedIn"
             rounded="lg">
             <template v-slot:activator="{ on, attrs }">
                 <v-btn
                 v-bind="attrs"
                 v-on="on"
-                icon
+                icon large
+                color="accent"
                 >
-                <v-icon>mdi-menu</v-icon>
+                <v-icon>mdi-chevron-down</v-icon>
                 </v-btn>
             </template>
             <v-list>
@@ -42,27 +52,31 @@
             </v-list>
         </v-menu>
 
-        <v-btn color="primary darken-1"
+        <v-btn color="accent"
         v-show="!this.$store.state.isLoggedIn"
         router to="/register" v-bind="size">
             <span>Registriraj se</span>
             <v-icon right>mdi-account-arrow-right</v-icon>
         </v-btn>
-        <v-btn text color="gray"
+        <v-btn text color="primary"
         v-show="!this.$store.state.isLoggedIn"
         router to="/login" v-bind="size">
             <span>Prijavi se</span>
             <v-icon right>mdi-login</v-icon>
         </v-btn>
     </v-app-bar>
+    <Sidebar v-model="drawer"></Sidebar>
 </div>
 
 </template>
 
 <script>
+import Sidebar from '../components/Sidebar'
+
     export default {
         data() {
             return {
+                drawer: false
             }
         },
 
@@ -82,6 +96,10 @@
                 })
                 setTimeout(()=>location.reload(), 100)
             }
+        },
+
+        components: {
+            Sidebar
         }
     }
 </script>

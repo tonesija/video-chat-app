@@ -1,5 +1,6 @@
 <template>
-    <v-container>
+    <v-navigation-drawer light v-model="innerVal" app class="primary">
+    <v-container>   
         <v-row align="center" justify="center" class="mt-4">
             <p>Prijatelji</p>
         </v-row>
@@ -66,7 +67,7 @@
             </v-menu>
         </v-row>
     </v-container>
-
+    </v-navigation-drawer>
 </template>
 
 <script>
@@ -82,11 +83,24 @@ import FService from '../services/friendsService'
             }
         },
 
+        props: {
+            value: Boolean
+        },
+
 
         computed: {
             size () {
                 const size = {xs:'x-small',sm:'small',lg:'large',xl:'x-large'}[this.$vuetify.breakpoint.name];
                 return size ? { [size]: true } : {}
+            },
+
+            innerVal: {
+                get() {
+                    return this.value
+                },
+                set(val) {
+                    this.$emit('input', val)
+                }
             }
         },
 
