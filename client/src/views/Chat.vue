@@ -1,5 +1,5 @@
 <template>
-  <div class="home height100">
+  <div class="home">
     <v-toolbar class="primary">
       <v-toolbar-title class="accent--text font-weight-bold">
         {{otherUsername}}
@@ -13,11 +13,10 @@
         </v-btn>
       </v-toolbar-items>
     </v-toolbar>
-    <v-container class="px-3 pt-4 mx-0" style="max-height: 100%">
-      
-      <ChatMsgs style="max-height: 650px" ref="chat-msgs"
-    class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
-
+    <v-container class="px-3 pt-4 mx-0 mr-0" style="max-height: 100%; width: 100%;">
+    
+        <ChatMsgs style="max-height: 650px" ref="chat-msgs"
+          class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
         
       <v-textarea v-model="newMessage" class=""
         filled rounded dense height="78" @keydown="onPressKey">
@@ -34,17 +33,17 @@
         max-width="290"
       >
         <v-card>
-          <v-card-title class="headline">
-            Čekam odgovor od {{otherUsername}}
+          <v-card-title class="headline" style="word-break: normal;">
+            Čekam odgovor od {{otherUsername}}{{dots}}
           </v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               color="error"
-              text
+              fab
               @click="abortCallRequest"
             >
-              Prekini poziv
+              <v-icon>mdi-phone-hangup</v-icon>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -68,7 +67,9 @@ export default {
       newMessage: null,
       messages: [],
 
-      dialog: false
+      dialog: false,
+      dots: '.',
+      dotInterval: null
     }
   },
 
@@ -136,6 +137,13 @@ export default {
         reciver: this.otherUsername
       })
       this.dialog = true
+
+      this.dotInterval = setInterval(() => {
+        if(this.dots === '...')
+          this.dots = '.'
+        else
+          this.dots += '.'
+      }, 500)
     },
 
     abortCallRequest(){
@@ -144,6 +152,7 @@ export default {
         reciver: this.otherUsername,
         sender: this.$store.state.username
       })
+      clearInterval(this.dotInterval)
     },
 
     onLoad(){
@@ -204,6 +213,7 @@ export default {
 
   destroyed: function() {
     document.removeEventListener('keydown', this.onKeyPress)
+    clearInterval(this.dotInterval)
   },
 
 

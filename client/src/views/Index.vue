@@ -1,5 +1,5 @@
 <template>
-    <v-container>
+    <v-container class="index">
       <p class="subtitle">Index</p>
     </v-container>
 </template>

@@ -1,7 +1,7 @@
 <template>
   <div class="register">
     <v-container>
-      <p class="primary--text text--darken-4 display-1">Registracija</p>
+      <p class="secondary--text font-weight-bold display-1">Registracija</p>
       <v-form v-model="valid">
         <v-container>
           <v-text-field
@@ -41,7 +41,7 @@
       <v-container>
         <v-btn
           :disabled="!valid"
-          color="primary"
+          color="accent"
           class="ml-2 mr-1"
           @click="register"
         >
@@ -50,7 +50,7 @@
 
         <v-btn
           outlined
-          color="primary"
+          color="secondary"
           class=""
           @click="goToLogin"
         >

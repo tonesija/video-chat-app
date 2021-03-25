@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <v-container>
-      <p class="primary--text text--darken-4 display-1">Prijava</p>
+      <p class="secondary--text font-weight-bold display-1">Prijava</p>
       <v-form v-model="valid">
         <v-container>
           <v-text-field
@@ -35,7 +35,7 @@
       <v-container>
             <v-btn
               :disabled="!valid"
-              color="primary"
+              color="accent"
               class="mr-1 ml-2"
               @click="login"
             >
@@ -44,7 +44,7 @@
 
             <v-btn
               outlined
-              color="primary"
+              color="secondary"
               class=""
               @click="goToRegister"
             >

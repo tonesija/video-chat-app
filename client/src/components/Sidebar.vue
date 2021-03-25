@@ -1,20 +1,20 @@
 <template>
     <v-navigation-drawer light v-model="innerVal" app class="primary">
     <v-container>   
-        <v-row align="center" justify="center" class="mt-4">
-            <p>Prijatelji</p>
+        <v-row align="center" justify="center" class="mt-1">
+            <p class="subtitle secondary--text font-weight-bold">Prijatelji</p>
         </v-row>
 
-        <v-row align="center" justify="center" class="pa-0 ma-0">
-            <v-list class="primary pa-0 ma-0">
+        <v-row align="center" justify="start" class="pa-0 ma-0">
+            <v-list class="primary pa-0 ma-0" width="100%">
                 <v-list-item v-for="f in friends" :key="f.username"
-                class="pa-0 ma-0"
+                class="pa-0 ma-0" dense
                 router :to="'/chat/'+f.username">
                     <v-list-item-action>
-                        <v-icon>mdi-circle</v-icon>
+                        <v-icon small>mdi-circle</v-icon>
                     </v-list-item-action>
                     <v-list-item-title class="caption">
-                        {{ addThreeDots(f.username, 10) }}
+                        {{ addThreeDots(f.username, 14) }}
                     </v-list-item-title>
                 </v-list-item>
             </v-list>
@@ -25,7 +25,7 @@
                 rounded="lg">
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
-                    color="primary darken-2"
+                    color="accent"
                     v-bind="{attrs: attrs, size: size}"
                     v-on="on"
                     small
@@ -43,8 +43,8 @@
                             </v-text-field>
                         </v-flex>
                         <v-flex xs3>
-                            <v-btn icon class="secondary darken-3 ml-3"
-                            @click="addFriend">
+                            <v-btn icon class="accent ml-3"
+                            @click="addFriend" fab small>
                                 <v-icon color="white">mdi-plus</v-icon>
                             </v-btn>
                         </v-flex>
@@ -62,9 +62,18 @@
                             {{ message }}
                         </v-alert>
                     </v-row> 
-                    
                 </v-container>
             </v-menu>
+        </v-row>
+    </v-container>
+    <v-container slot="append">
+        <v-row justify="center">
+            <p class="text-uppercase secondary--text subtitle">
+                    Video
+                <span class="font-weight-light">
+                    chat
+                </span>
+            </p>
         </v-row>
     </v-container>
     </v-navigation-drawer>

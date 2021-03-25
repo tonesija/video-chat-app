@@ -2,32 +2,35 @@
   <v-app>
     <Navbar></Navbar>
     <v-main>
-      <router-view class="px-10 white"></router-view>
+      <router-view class="px-md-10 px-lg-10 
+        px-xl-10 px-sm-5 px-xs-0 
+        white height100"></router-view>
 
       <v-dialog
         v-model="call"
         persistent
         max-width="290"
+        style="word-break: normal;"
       >
         <v-card>
-          <v-card-title class="headline">
-            {{ caller }} vas zove.
+          <v-card-title class="headline" style="word-break: normal;">
+            {{ caller }} vas zove{{dots}}
           </v-card-title>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
               color="error"
-              text
+              icon class="mr-3" x-large
               @click="denyCall"
             >
-              Poklopi
+              <v-icon>mdi-phone-hangup</v-icon>
             </v-btn>
             <v-btn
               color="success"
-              text
+              fab
               @click="acceptCall"
             >
-              Odgovori
+              <v-icon>mdi-phone</v-icon>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -48,7 +51,10 @@ export default {
   data() {
     return {
       call: false,
-      caller: null
+      caller: null,
+
+      dots: '.',
+      dotInterval: null
     }
   },
 
@@ -101,11 +107,20 @@ export default {
     async callRequest(sender) {
       this.caller = sender
       this.call = true
+
+      this.dotInterval = setInterval(() => {
+        if(this.dots === '...')
+          this.dots = '.'
+        else
+          this.dots += '.'
+      }, 500)
     },
     async abortCallRequest(sender){
       console.log('Call aborted by ', sender)
       this.caller = null
       this.call = false
+
+      clearInterval(this.dotInterval)
     }
   },
 
