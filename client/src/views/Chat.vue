@@ -18,13 +18,13 @@
         <ChatMsgs style="max-height: 650px" ref="chat-msgs"
           class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
         
-      <v-textarea v-model="newMessage" class=""
-        filled rounded dense height="78" @keydown="onPressKey">
-        <v-btn slot="append-outer" @click="sendMessage" 
+      <v-text-field v-model="newMessage" class=""
+        filled shaped height="75" dense @keydown="onPressKey">
+        <v-btn slot="append-outer"  @click="sendMessage" 
           color="accent" fab>
           <v-icon>mdi-send</v-icon>
         </v-btn>
-      </v-textarea>
+      </v-text-field>
 
 
       <v-dialog
@@ -176,6 +176,8 @@ export default {
   sockets: {
     newMessage: async function(msg) {
       console.log('dobijena poruka preko socketa: ', msg)
+      if(msg.user1.username !== this.$route.params.username)
+        return
       this.messages.push(msg)
       this.scrollToBottom('chat-msgs')
     },
