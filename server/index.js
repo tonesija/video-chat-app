@@ -24,7 +24,7 @@ const io = socketio(server, {
 
 
 //pokreni se kad se client spoji
-require('./socketio')(io)
+require('./socketio').initializeIo(io)
 
 
 app.use(bodyParser.json())

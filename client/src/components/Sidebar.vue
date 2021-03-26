@@ -1,11 +1,27 @@
 <template>
-    <v-navigation-drawer light v-model="innerVal" app class="primary">
+    <v-navigation-drawer light v-model="innerVal" 
+        app class="primary">
     <v-container>   
-        <v-row align="center" justify="center" class="mt-1">
+        <v-row align="center" justify="center" class="mt-1"
+            v-show="$store.state.isLoggedIn">
             <p class="subtitle secondary--text font-weight-bold">Prijatelji</p>
         </v-row>
 
-        <v-row align="center" justify="start" class="pa-0 ma-0">
+        <v-row v-show="!$store.state.isLoggedIn"
+            align="center" justify="center">
+            <p class="subtitle secondary--text">
+                <v-btn to="register" class="ma-0 pa-0"
+                    plain depressed text>Registrirajte se
+                </v-btn> za dodavanje prijatelja
+            </p>
+        </v-row>
+
+        <v-row v-show="$store.state.isLoggedIn && this.friends.length == 0">
+            <p class="subtitle secondary--text">Nemate dodanih prijatelja, dodajte prijatelja dolje</p>
+        </v-row>
+
+        <v-row align="center" justify="start" class="pa-0 ma-0"
+            v-show="$store.state.isLoggedIn">
             <v-list class="primary pa-0 ma-0" width="100%">
                 <v-list-item v-for="f in friends" :key="f.username"
                 class="pa-0 ma-0" dense
@@ -16,11 +32,18 @@
                     <v-list-item-title class="caption">
                         {{ addThreeDots(f.username, 14) }}
                     </v-list-item-title>
+                    <v-icon 
+                        v-show="f.newMsgCount"
+                        color="accent"
+                        fab >
+                        mdi-numeric-{{f.newMsgCount}}-circle
+                    </v-icon>
                 </v-list-item>
             </v-list>
         </v-row>
 
-        <v-row align="center" justify="center">
+        <v-row align="center" justify="center" 
+            v-show="$store.state.isLoggedIn">
             <v-menu offset-y :close-on-content-click="false"
                 rounded="lg">
                 <template v-slot:activator="{ on, attrs }">
@@ -150,20 +173,50 @@ import FService from '../services/friendsService'
             }
         },
 
+        sockets: {
+            newMessage: async function(msg) {
+                let from = msg.user1.username
+                if(this.$route.params.username === from) return
+
+                for(let i = 0; i < this.friends.length; ++i){
+                    if(this.friends[i].username === from){
+                        let tmp = this.friends[i]
+                        if(tmp.newMsgCount)
+                            tmp.newMsgCount++
+                        else 
+                            tmp.newMsgCount = 1
+                        this.$set(this.friends, i, tmp)
+                        break
+                    }
+                }
+            },
+            newFriend: async function() {
+                this.getFriends()
+            },
+            loggedIn: async function() {
+                this.getFriends()
+            }
+        },
+
         created: function() {
-            this.getFriends()
         },
 
 
         //on route change
         watch:{
-            $route (){
-                console.log('route changed')
-                if(this.$store.state.isLoggedIn){
-                    console.log('gettam friends')
-                    this.getFriends()
-                } else {
-                    this.friends = []
+            $route (to, from){
+                console.log('route changed',to , from)
+
+                if(to.params.username){
+                    let username = to.params.username
+                    for(let i = 0; i < this.friends.length; ++i){
+                        if(this.friends[i].username === username){
+                            let tmp = this.friends[i]
+                            tmp.newMsgCount = null
+                            this.$set(this.friends, i, tmp)
+                            break
+                        }
+                    }
                 }
             }
         }
@@ -176,6 +229,9 @@ import FService from '../services/friendsService'
         white-space: nowrap;
         overflow: hidden;
         width:100px; 
+    }
 
+    p{
+        text-align: center;
     }
 </style>

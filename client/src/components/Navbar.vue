@@ -1,10 +1,17 @@
 <template>
 <div>
     <v-app-bar class="secondary" app>
-        <v-btn @click="drawer = !drawer" fab small class="accent mr-2">
-            <v-icon>mdi-menu</v-icon>
-        </v-btn>
-        <v-toolbar-title class="text-uppercase primary--text"
+        <div class="relative">
+            <v-btn @click="openCloseDrawer" fab small class="accent">
+                <v-icon>mdi-menu</v-icon>
+            </v-btn>
+            <div class="top-right" v-show="newMsgs">
+                <v-icon color="accent lighten-3" 
+                    >
+                    mdi-numeric-{{newMsgs}}-circle</v-icon>
+            </div>
+        </div>
+        <v-toolbar-title class="text-uppercase primary--text ml-3"
             router to="/">
             Video<span class="font-weight-light">chat</span>
         </v-toolbar-title>
@@ -73,7 +80,9 @@ import Sidebar from '../components/Sidebar'
     export default {
         data() {
             return {
-                drawer: false
+                drawer: false,
+
+                newMsgs: 0
             }
         },
 
@@ -92,6 +101,19 @@ import Sidebar from '../components/Sidebar'
                     email: this.$store.state.email
                 })
                 setTimeout(()=>location.reload(), 100)
+            },
+            openCloseDrawer(){
+                this.drawer = !this.drawer
+                if(this.drawer)
+                    this.newMsgs = 0
+            }
+        },
+
+        sockets: {
+            newMessage: async function(msg) {
+                let from = msg.user1.username
+                if(this.$route.params.username === from) return
+                this.newMsgs++
             }
         },
 
@@ -100,3 +122,14 @@ import Sidebar from '../components/Sidebar'
         }
     }
 </script>
+
+<style scoped>
+    .relative{
+        position: relative;
+    } 
+    .top-right{
+        position: absolute;
+        top: -0.4rem;
+        right: -0.7rem;
+    }
+</style>

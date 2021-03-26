@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken')
 const config = require('../config')
 
 const {sendResponse, sendError} = require('../util')
+const { sendFriendNotif } = require('../socketio')
 
 
 //vraća jwt
@@ -164,6 +165,8 @@ module.exports = {
         sendResponse(res, {
           message: `${otherUsername} je sada vaš prijatelj.`
         })
+
+        sendFriendNotif(otherUsername)
       } else {
         sendError(res, 'Taj korisnik ne postoji.', 400)
       }
