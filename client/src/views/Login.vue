@@ -92,7 +92,8 @@ export default {
         this.$store.dispatch('setUser', {
           creds: {username: data.user.username,
           email: data.user.email},
-          token: data.token
+          token: data.token,
+          imgPath: data.user.imgPath
         })
 
         this.$router.push('/')

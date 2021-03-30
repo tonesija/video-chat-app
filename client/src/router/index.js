@@ -8,6 +8,7 @@ import Login from '../views/Login'
 import Index from '../views/Index.vue'
 import Chat from '../views/Chat.vue'
 import Call from '../views/Call.vue'
+import Settings from '../views/Settings.vue'
 
 
 Vue.use(VueRouter)
@@ -27,6 +28,11 @@ const routes = [
     path: '/chat/:username',
     name: 'Chat',
     component: Chat
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: Settings
   },
   {
     path: '/call/:username',

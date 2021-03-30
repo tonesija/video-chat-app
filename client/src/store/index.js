@@ -3,17 +3,21 @@ import Vuex from 'vuex'
 
 import router from '../router' // Vue router instance
 
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
     username: null,
     email: null,
+    imgPath: null,
     isLoggedIn: false,
 
     inPrivateCall: false,
     callee: null,
-    caller: false
+    caller: false,
+
+    lightTheme: true
   },
   mutations: {
     setUser(state, creds) {
@@ -25,7 +29,15 @@ export default new Vuex.Store({
         state.isLoggedIn = false
         state.username = null
         state.email = null
+        state.imgPath = null
       }
+    },
+
+    setImgPath(state, imgPath){
+      if(imgPath){
+        state.imgPath = imgPath
+      } else
+        state.imgPath = null
     },
 
     setCall(state, {callee, caller}){
@@ -37,11 +49,16 @@ export default new Vuex.Store({
         state.callee = null
       }
       state.caller = caller
+    },
+
+    setTheme(state, theme){
+      state.lightTheme = theme
     }
   },
   actions: {
-    setUser({commit}, {creds, token}) {
+    setUser({commit}, {creds, token, imgPath}) {
       commit('setUser', creds)
+      commit('setImgPath', imgPath)
 
       //store the token
       localStorage.setItem('token', token)
@@ -49,6 +66,10 @@ export default new Vuex.Store({
       //emit event
       this._vm.$socket.client.emit('user-logged-in', {creds})
     },
+    changeProfileImg({commit}, {newImgUrl}){
+      commit('setImgPath', newImgUrl)
+    },
+
     signOut({commit}, {creds}) {
       commit('setUser', null)
 
@@ -62,6 +83,22 @@ export default new Vuex.Store({
       
       if(callee)
         router.push('/call/'+callee)
+    },
+
+    setTheme({commit}, {lightTheme, Vuetify}){
+      commit('setTheme', lightTheme)
+
+      console.log(Vue.prototype.$vuetify)
+
+      if(lightTheme){
+        Vuetify.theme.themes.light.primary = Vuetify.theme.themes.dark.primary
+        Vuetify.theme.themes.light.secondary = Vuetify.theme.themes.dark.secondary
+        Vuetify.theme.themes.light.accent = Vuetify.theme.themes.dark.accent
+      } else {
+        Vuetify.theme.themes.light.primary = '#555555'
+        Vuetify.theme.themes.light.secondary = '#a66666'
+        Vuetify.theme.themes.light.accent = '#cc1'
+      }
     }
   },
   modules: {

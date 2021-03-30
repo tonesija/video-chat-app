@@ -17,6 +17,10 @@
         </v-toolbar-title>
         <v-spacer></v-spacer>
 
+        <v-avatar size="40" class="mr-2">
+            <img v-if="$store.state.imgPath"
+                :src="`${baseUrl}${$store.state.imgPath}`"/>
+        </v-avatar>
         <v-toolbar-title class="primary--text font-weight-light mr-1">
             <span>
                 {{$store.state.username}}
@@ -91,6 +95,10 @@ import Sidebar from '../components/Sidebar'
             size () {
                 const size = {xs:'x-small',sm:'small',lg:'large',xl:'x-large'}[this.$vuetify.breakpoint.name];
                 return size ? { [size]: true } : {}
+            },
+
+            baseUrl () {
+                return process.env.VUE_APP_ENV_BASE_URL
             }
         },
 

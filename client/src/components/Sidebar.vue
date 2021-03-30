@@ -26,8 +26,21 @@
                 <v-list-item v-for="f in friends" :key="f.username"
                 class="pa-0 ma-0" dense
                 router :to="'/chat/'+f.username">
-                    <v-list-item-action>
-                        <v-icon small>mdi-circle</v-icon>
+                    <v-list-item-action class="relative">
+                        <div class="relative" v-if="f.imgPath">
+                            <v-avatar size="32" class="avatar">
+                                <img v-if="f.imgPath" 
+                                    :src="`${baseUrl}${f.imgPath}`"/>
+                            </v-avatar>
+                            <v-icon small class="bottom-right">mdi-circle</v-icon>
+                        </div>
+                        <div class="relative" v-if="!f.imgPath">
+                            <v-avatar size="32" class="avatar"
+                                color="secondary">
+                            </v-avatar>
+                            <v-icon small class="bottom-right">mdi-circle</v-icon>
+                        </div>
+
                     </v-list-item-action>
                     <v-list-item-title class="caption">
                         {{ addThreeDots(f.username, 14) }}
@@ -131,6 +144,10 @@ import FService from '../services/friendsService'
                 set(val) {
                     this.$emit('input', val)
                 }
+            },
+
+            baseUrl () {
+                return process.env.VUE_APP_ENV_BASE_URL
             }
         },
 
@@ -233,5 +250,19 @@ import FService from '../services/friendsService'
 
     p{
         text-align: center;
+    }
+
+    .relative{
+        position: relative;
+    } 
+    .bottom-right{
+        position: absolute;
+        top: 0.65rem;
+        right: -0.9rem;
+    }
+    .avatar{
+        position: absolute;
+        top: -0.3rem;
+        right: -0.75rem;
     }
 </style>

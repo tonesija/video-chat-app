@@ -6,5 +6,8 @@ export default {
   },
   async getFriends(payload){
     return api().post('/getFriends', payload)
+  },
+  async getUser(payload){
+    return api().post('getUser', payload)
   }
 }

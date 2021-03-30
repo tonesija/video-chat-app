@@ -1,6 +1,9 @@
 <template>
   <div class="home">
     <v-toolbar class="primary">
+      <v-avatar size="42" class="mr-2" v-if="otherUser && otherUser.imgPath">
+        <img :src="`${baseUrl}${otherUser.imgPath}`"/>
+      </v-avatar>
       <v-toolbar-title class="accent--text font-weight-bold">
         {{otherUsername}}
       </v-toolbar-title>
@@ -52,6 +55,7 @@
 import ChatMsgs from '../components/ChatMessages'
 import MsgServ from '../services/chatService'
 import ChatInput from '../components/ChatInput'
+import friendsService from '../services/friendsService'
 
 export default {
   name: 'Home',
@@ -59,12 +63,19 @@ export default {
   data: ()=> {
     return {
       otherUsername: null,
+      otherUser: null,
       newMessage: null,
       messages: [],
 
       dialog: false,
       dots: '.',
       dotInterval: null
+    }
+  },
+
+  computed: {
+    baseUrl () {
+      return process.env.VUE_APP_ENV_BASE_URL
     }
   },
 
@@ -150,9 +161,12 @@ export default {
       clearInterval(this.dotInterval)
     },
 
-    onLoad(){
+    async onLoad(){
       this.otherUsername = this.$route.params.username
       this.getMessages()
+
+      this.otherUser = (await friendsService.getUser(
+              {username: this.otherUsername})).data.user
     },
 
     scrollToBottom(ref){

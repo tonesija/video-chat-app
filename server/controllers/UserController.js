@@ -5,7 +5,6 @@ const config = require('../config')
 const {sendResponse, sendError} = require('../util')
 const { sendFriendNotif } = require('../socketio')
 
-
 //vraća jwt
 function jwtSingUser (dbUser) {
   return jwt.sign(dbUser, config.authentication.jwtSecret, {
@@ -22,9 +21,12 @@ function jwtVerifyUser (token) {
 function formatUser(user){
   return {
     username: user.username,
-    email: user.email
+    email: user.email,
+    imgPath: user.imgPath
   }
 }
+
+function removeSpaces (path) {return path.replace(/\s/g , "-");}
 
 module.exports = {
   async register (req, res) {
@@ -97,9 +99,13 @@ module.exports = {
       console.log('token: ', token)
       let user = jwtVerifyUser(token)
 
+      user = await User.findOne({where: {
+        username: user.username
+      }})
+
       if(user){
         sendResponse(res, {
-          user: user,
+          user: formatUser(user),
           token: token
         })
         return
@@ -208,6 +214,67 @@ module.exports = {
         friends: friends
       })
       
+    } catch(e) {
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+
+  async getUser(req, res) {
+    try {
+      let username = req.body.username
+      let user = await User.findOne({where: {
+        username: username
+      }})
+
+      if(user){
+        sendResponse(res, {
+          user: formatUser(user)
+        })
+      } else {
+        sendError(res, 'Taj korisnik ne postoji')
+      }
+    } catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+
+  async setNewProfileImg(req, res) {
+    let token = req.body.token
+
+    console.log('Postavljam novu sliku korisniku')
+
+    if(!token){
+      sendError(res, 'Greška u autentifikaciji.', 400)
+      return
+    }
+
+    try {
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+
+      user = await User.findOne({
+        where: {
+          username: user.username
+        }
+      })
+
+      //postavi mu put
+      let imgName = removeSpaces(req.files['img'][0].filename)
+
+      user.imgPath = `profile-images/${imgName}`
+      await user.save()
+
+      sendResponse(res, {
+        message: 'Profilna slika uspješno postavljena',
+        path: user.imgPath
+      })
+
     } catch(e) {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)

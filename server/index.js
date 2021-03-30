@@ -10,6 +10,8 @@ const {sequelize} = require("./models")
 const app = express()
 
 app.use(serveStatic(path.join(__dirname, 'static/SPA')))
+app.use(express.static('static/images'))
+
 
 //za socket.io
 const http = require('http')
@@ -34,7 +36,7 @@ app.use(cors())
 require('./routes')(app)
 
 let port = require('./config').PORT
-sequelize.sync({force: false}).then(() => {
+sequelize.sync({force: true}).then(() => {
     server.listen(port)
     console.log("Server started on port: ", port)
 })
