@@ -68,7 +68,15 @@ function onTrack(pc, remoteVideoStream){
       console.log('Got a track!!!')
       remoteVideoStream.addTrack(event.track, remoteVideoStream)
   })
+}
 
+function onNegotiationNeeded(pc, reciver, socket){
+  pc.addEventListener('negotiationneeded', async (event) => {
+    console.log('NEGOTIATION NEEDED', event)
+    let newOffer = await pc.createOffer()
+    await pc.setLocalDescription(newOffer)
+    socket.emit('offer', {offer: newOffer, reciver: reciver})
+  })
 }
 
 function setupNewPc(pc, sender, reciver, socket){
@@ -136,6 +144,7 @@ exports.onIceCandidate = onIceCandidate
 exports.oneIceConnectionChange = oneIceConnectionChange
 exports.onMessageIceCandidate = onMessageIceCandidate
 exports.onTrack = onTrack
+exports.onNegotiationNeeded = onNegotiationNeeded
 
 exports.myOnTrack = myOnTrack
 exports.setupNewPc = setupNewPc

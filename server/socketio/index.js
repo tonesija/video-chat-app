@@ -132,6 +132,28 @@ module.exports = {
                     console.log('Failed to find a reciver.')
                 }
             })
+
+            socket.on('pc-setup', ({reciver}) => {
+                console.log(`Telling reciver ${reciver} that pc is setup`)
+                
+                let reciverId = getUserId(reciver)
+                if(reciverId){
+                    io.to(reciverId).emit('otherPcSetUp')
+                } else {
+                    console.log('Failed to find a reciver.')
+                }
+            })
+
+            socket.on('hang-up', ({reciver}) => {
+                console.log(`Hanging up on ${reciver}`)
+                
+                let reciverId = getUserId(reciver)
+                if(reciverId){
+                    io.to(reciverId).emit('otherUserHangedUp')
+                } else {
+                    console.log('Failed to find a reciver.')
+                }
+            })
     
             // --- private chat logic ---
             socket.on('new-message', ({username, msg}) =>{

@@ -22,7 +22,7 @@
         </v-layout>
       </v-menu>
     </v-row>
-
+    <v-btn @click="turnOnCamera">Turn camera on</v-btn>
 
     <v-row align="center" justify="center">
       <v-menu offset-y :close-on-content-click="false"
@@ -43,7 +43,7 @@
     </v-row>
 
     <v-row align="end" justify="center">
-      <v-btn icon x-large @click="hangUp">
+      <v-btn icon x-large @click="hangUp(true)">
         <v-icon x-large color="error">mdi-phone-hangup</v-icon>
       </v-btn>
     </v-row>
@@ -81,6 +81,8 @@ export default {
         ]
       },
       pc: null,
+      isOtherPcSetUp: false,
+      pcSetUp: false,
 
       otherUser: null,
       volume: 50
@@ -105,6 +107,14 @@ export default {
         console.error('Error adding received ice candidate', e);
         }
       }
+    },
+    otherPcSetUp: async function() {
+      this.otherPcSetUp = true
+      if(this.pcSetUp && this.$store.state.caller)
+        this.makeCall()
+    },
+    otherUserHangedUp: async function() {
+      this.hangUp(false)
     }
   },
 
@@ -146,19 +156,38 @@ export default {
       this.remoteVideoStream = new MediaStream()
       RTCService.onTrack(this.pc, this.remoteVideoStream)
 
-      if(this.$store.state.caller){
+      this.pcSetUp = true
+      this.$socket.client.emit('pc-setup', {reciver: this.otherUser})
+
+      if(this.$store.state.caller && this.isOtherPcSetUp){
         setTimeout(() => {
           this.makeCall()
         }, 1200)
       }
     },
 
+    turnOnCamera(){
+      RTCService.onNegotiationNeeded(this.pc, this.otherUser, this.$socket.client)
+      navigator.mediaDevices.getUserMedia({video:true})
+      .then(stream => {
+          console.log('Got MediaStream:', stream)
+          //this.videoStream = stream
+          //add the tracks to RTCPeerConnection
+          stream.getTracks().forEach(track => {
+            this.videoStream.addTrack(track)
+            this.pc.addTrack(track, this.videoStream)
+            console.log('Adding track to peer connection!')
+          })
+      })
+    },
+
     changeVolume(){
-      console.log('changing vol to', this.volumeAdj)
       this.$refs['otherVideo'].volume = this.volumeAdj
     },
 
-    hangUp(){
+    hangUp(first){
+      if(first)
+        this.$socket.client.emit('hang-up', {reciver: this.otherUser})
       this.$router.push('/chat/'+this.otherUser)
     }
 
@@ -171,7 +200,7 @@ export default {
 
     this.pc = new RTCPeerConnection(this.iceConfiguration)
 
-    navigator.mediaDevices.getUserMedia(this.constraints)
+    navigator.mediaDevices.getUserMedia({audio:true})
     .then(stream => {
         console.log('Got MediaStream:', stream)
         this.videoStream = stream
