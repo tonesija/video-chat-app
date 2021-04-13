@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     imgPath: DataTypes.STRING,
-    password: DataTypes.STRING
+    password: DataTypes.STRING,
+    theme: DataTypes.BOOLEAN
   }, {timestamps: false})
 
   const Friends = sequelize.define('Friends')

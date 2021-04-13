@@ -44,6 +44,9 @@ module.exports = (app) => {
         cpUpload,
         UserController.setNewProfileImg
     )
+    app.post('/newTheme',
+        UserController.setTheme
+    )
 
 
     app.post('/addFriend',

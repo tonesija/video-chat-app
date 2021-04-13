@@ -22,7 +22,8 @@ function formatUser(user){
   return {
     username: user.username,
     email: user.email,
-    imgPath: user.imgPath
+    imgPath: user.imgPath,
+    theme: user.theme
   }
 }
 
@@ -235,6 +236,44 @@ module.exports = {
         sendError(res, 'Taj korisnik ne postoji')
       }
     } catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+
+  async setTheme(req, res) {
+    let theme = req.body.theme
+    let token = req.body.token
+
+    console.log("Postavlam temu korisniku", theme)
+
+    if(!token){
+      sendError(res, 'Greška u autentifikaciji.', 400)
+      return
+    }
+
+    try {
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+
+      user = await User.findOne({
+        where: {
+          username: user.username
+        }
+      })  
+      user.theme = theme
+      await user.save()
+
+      console.log("Tema uspjesno postavljena")
+      sendResponse(res, {
+        message: 'Uspješno postavljena nova tema'
+      })
+
+    } catch(e) {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }

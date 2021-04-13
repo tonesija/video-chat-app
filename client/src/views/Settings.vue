@@ -47,7 +47,7 @@ export default {
       imgError: false,
       errorMsg: null,
 
-      lightTheme: true
+      lightTheme: this.$store.state.lightTheme
     }
   },
 
@@ -83,9 +83,12 @@ export default {
 
     changeTheme(){
       this.$store.dispatch('setTheme', {
-        lightTheme: this.lightTheme,
+        theme: this.lightTheme,
         Vuetify: this.$vuetify 
       })
+
+      settings.setTheme({theme: this.lightTheme,
+        token: localStorage.getItem('token')})
     }
   }
 }

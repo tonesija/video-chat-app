@@ -58,9 +58,13 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    setUser({commit}, {creds, token, imgPath}) {
+    setUser({commit, dispatch}, {creds, token, imgPath, Vuetify}) {
       commit('setUser', creds)
       commit('setImgPath', imgPath)
+      dispatch('setTheme', {
+        theme: creds.theme,
+        Vuetify: Vuetify 
+      })
 
       //store the token
       localStorage.setItem('token', token)
@@ -87,12 +91,10 @@ export default new Vuex.Store({
         router.push('/call/'+callee)
     },
 
-    setTheme({commit}, {lightTheme, Vuetify}){
-      commit('setTheme', lightTheme)
+    setTheme({commit}, {Vuetify, theme}){
+      commit('setTheme', theme)
 
-      console.log(Vue.prototype.$vuetify)
-
-      if(lightTheme){
+      if(theme){
         Vuetify.theme.themes.light.primary = COLORS.light.primary
         Vuetify.theme.themes.light.secondary = COLORS.light.secondary
         Vuetify.theme.themes.light.accent = COLORS.light.accent

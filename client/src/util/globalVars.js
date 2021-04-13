@@ -6,10 +6,10 @@ const COLORS = {
     background: '#FFFFFF'
   },
   dark: {
-    primary: '#555555',
-    secondary: '#a66666',
-    accent: '#cc1',
-    background: '#000000'
+    primary: '#9F6BA0',
+    secondary: '#FCEFF9',
+    accent: '#90E0F3',
+    background: '#171123'
   },
   online: '#23CE6B',
   offline: '#EF798A'

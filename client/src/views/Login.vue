@@ -91,9 +91,11 @@ export default {
         //postavi korisnika u vuex
         this.$store.dispatch('setUser', {
           creds: {username: data.user.username,
-          email: data.user.email},
+                  email: data.user.email,
+                  theme: data.user.theme},
           token: data.token,
-          imgPath: data.user.imgPath
+          imgPath: data.user.imgPath,
+          Vuetify: this.$vuetify
         })
 
         this.$router.push('/')
