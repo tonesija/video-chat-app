@@ -27,21 +27,19 @@
                 class="pa-0 ma-0" dense
                 router :to="'/chat/'+f.username">
                     <v-list-item-action>
-                        <div class="relative" v-if="f.imgPath">
-                            <v-avatar size="32">
+                        <div class="relative">
+                            <v-avatar size="32" v-if="f.imgPath">
                                 <img v-if="f.imgPath" 
                                     :src="`${baseUrl}${f.imgPath}`"/>
                             </v-avatar>
-                            <div class="bottom-right">
-                                <v-icon small>mdi-circle</v-icon>
-                            </div>
-                        </div>
-                        <div class="relative" v-if="!f.imgPath">
-                            <v-avatar size="32"
+                            <v-avatar size="32" v-if="!f.imgPath"
                                 color="secondary">
                             </v-avatar>
                             <div class="bottom-right">
-                                <v-icon small>mdi-circle</v-icon>
+                                <v-icon :class="{'online--text': statuses.get(f.username),
+                                        'offline--text': !statuses.get(f.username)}"
+                                small
+                                >mdi-circle</v-icon>
                             </div>
                         </div>
                     </v-list-item-action>
@@ -125,7 +123,9 @@ import FService from '../services/friendsService'
                 message: null,
                 alertType: null,
 
-                friends: []
+                friends: [],
+                statuses: new Map(),
+                statusInterval: null
             }
         },
 
@@ -190,6 +190,12 @@ import FService from '../services/friendsService'
                     text = text.substring(0, chars) + '...'
                 }
                 return text
+            },
+
+            askFriendsForStatus(){
+                for(let f of this.friends){
+                    this.$socket.client.emit('get-status', {username: f.username})
+                }
             }
         },
 
@@ -215,12 +221,23 @@ import FService from '../services/friendsService'
             },
             loggedIn: async function() {
                 this.getFriends()
+            },
+            status: async function({username, status}){
+                console.log('got status', username, status)
+                this.statuses.set(username, status)
             }
         },
 
         created: function() {
+            this.askFriendsForStatus()
+            this.statusInterval = setInterval(()=> {
+                this.askFriendsForStatus()
+            }, 6000)
         },
 
+        destroyed: function(){
+            clearInterval(this.statusInterval)
+        },
 
         //on route change
         watch:{

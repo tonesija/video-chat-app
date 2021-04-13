@@ -3,6 +3,8 @@ import Vuex from 'vuex'
 
 import router from '../router' // Vue router instance
 
+import {COLORS} from '../util/globalVars'
+
 
 Vue.use(Vuex)
 
@@ -91,13 +93,15 @@ export default new Vuex.Store({
       console.log(Vue.prototype.$vuetify)
 
       if(lightTheme){
-        Vuetify.theme.themes.light.primary = Vuetify.theme.themes.dark.primary
-        Vuetify.theme.themes.light.secondary = Vuetify.theme.themes.dark.secondary
-        Vuetify.theme.themes.light.accent = Vuetify.theme.themes.dark.accent
+        Vuetify.theme.themes.light.primary = COLORS.light.primary
+        Vuetify.theme.themes.light.secondary = COLORS.light.secondary
+        Vuetify.theme.themes.light.accent = COLORS.light.accent
+        Vuetify.theme.themes.light.background = COLORS.light.background
       } else {
-        Vuetify.theme.themes.light.primary = '#555555'
-        Vuetify.theme.themes.light.secondary = '#a66666'
-        Vuetify.theme.themes.light.accent = '#cc1'
+        Vuetify.theme.themes.light.primary = COLORS.dark.primary
+        Vuetify.theme.themes.light.secondary = COLORS.dark.secondary
+        Vuetify.theme.themes.light.accent = COLORS.dark.accent
+        Vuetify.theme.themes.light.background = COLORS.dark.background
       }
     }
   },

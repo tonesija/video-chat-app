@@ -38,9 +38,17 @@ module.exports = {
     
                 userJoin(socket.id, creds.username, null)
                 socket.emit('loggedIn')
+                socket.broadcast.emit('status', {username: creds.username, status: true})
             })
-    
-    
+            
+            socket.on('get-status', ({username}) => {
+                let id = getUserId(username)
+                if(id){
+                    socket.emit('status', {username: username, status: true})
+                } else{
+                    socket.emit('status', {username: username, status: false})
+                }
+            })
     
             //--- WebRTC signaling ---
             socket.on('offer', ({offer, reciver}) => {
@@ -214,6 +222,7 @@ module.exports = {
     
                 if(user) {
                     console.log(user.username + ' disconnect!')
+                    socket.broadcast.emit('status', {username: user.username, status: false})
                 } else {
                     console.log('Someone disconnected!')
                 }

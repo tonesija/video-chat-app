@@ -4,7 +4,7 @@
     <v-main class="">
       <router-view class="px-md-10 px-lg-10 
         px-xl-10 px-sm-5 px-xs-0 
-        white height100"></router-view>
+        background height100"></router-view>
 
       <v-dialog
         v-model="call"
