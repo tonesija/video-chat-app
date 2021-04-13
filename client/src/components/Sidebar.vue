@@ -26,7 +26,7 @@
                 <v-list-item v-for="f in friends" :key="f.username"
                 class="pa-0 ma-0" dense
                 router :to="'/chat/'+f.username">
-                    <v-list-item-action class="relative">
+                    <v-list-item-action>
                         <div class="relative" v-if="f.imgPath">
                             <v-avatar size="32" class="avatar">
                                 <img v-if="f.imgPath" 
@@ -40,7 +40,6 @@
                             </v-avatar>
                             <v-icon small class="bottom-right">mdi-circle</v-icon>
                         </div>
-
                     </v-list-item-action>
                     <v-list-item-title class="caption">
                         {{ addThreeDots(f.username, 14) }}

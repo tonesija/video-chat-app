@@ -17,7 +17,7 @@
       </v-toolbar-items>
     </v-toolbar>
     <v-container class="px-3 pt-4 mx-0 mr-0" style="max-height: 100%; width: 100%;">
-    
+        
         <ChatMsgs style="max-height: 650px" ref="chat-msgs"
           class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
         
