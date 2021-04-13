@@ -1,7 +1,7 @@
 <template>
-    <v-container class="index">
-      <p class="subtitle">Index</p>
-    </v-container>
+    <div class="index">
+      <p class="subtitle secondary--text">Index</p>
+    </div>
 </template>
 
 <script>

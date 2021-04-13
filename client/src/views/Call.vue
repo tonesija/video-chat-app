@@ -109,7 +109,7 @@ export default {
       }
     },
     otherPcSetUp: async function() {
-      this.otherPcSetUp = true
+      this.isOtherPcSetUp = true
       if(this.pcSetUp && this.$store.state.caller)
         this.makeCall()
     },
@@ -160,9 +160,9 @@ export default {
       this.$socket.client.emit('pc-setup', {reciver: this.otherUser})
 
       if(this.$store.state.caller && this.isOtherPcSetUp){
-        setTimeout(() => {
+        //setTimeout(() => {
           this.makeCall()
-        }, 1200)
+        //}, 1200)
       }
     },
 

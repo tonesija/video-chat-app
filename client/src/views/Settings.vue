@@ -10,11 +10,11 @@
         class="mb-0 secondary--text font-weight-light">Promijeni profilnu</p>
       <p v-show="!$store.state.imgPath"
         class="mb-0 secondary--text font-weight-light">Postavi profilnu</p>
-      <v-file-input accept="image/*"
-        prepend-icon="mdi-file"
-        @change="onNewImage"
+      <v-file-input accept="image/*" color="accent"
+        prepend-icon="mdi-file" 
+        @change="onNewImage" 
         :error="imgError" :error-messages="errorMsg"
-        name="img"  class="mt-0 pt-0"
+        name="img" class="mt-0 pt-0"
         >
         <template slot="append-outer">
           <v-btn icon @click="sendNewImage"
@@ -86,10 +86,16 @@ export default {
         theme: this.lightTheme,
         Vuetify: this.$vuetify 
       })
-
+      console.log(this.$store.state.lightTheme)
       settings.setTheme({theme: this.lightTheme,
         token: localStorage.getItem('token')})
     }
+  },
+
+  created: function(){
+    setTimeout(()=>{
+      this.lightTheme = this.$store.state.lightTheme
+    }, 150)
   }
 }
 </script>

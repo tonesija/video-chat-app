@@ -12,7 +12,7 @@
             </div>
         </div>
         <v-toolbar-title class="text-uppercase primary--text ml-3"
-            router to="/">
+            style="cursor: pointer" @click="$router.push('/').catch(()=>{})">
             Video<span class="font-weight-light">chat</span>
         </v-toolbar-title>
         <v-spacer></v-spacer>

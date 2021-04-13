@@ -54,6 +54,7 @@ export default new Vuex.Store({
     },
 
     setTheme(state, theme){
+      console.log("etting theme", theme)
       state.lightTheme = theme
     }
   },
@@ -61,10 +62,12 @@ export default new Vuex.Store({
     setUser({commit, dispatch}, {creds, token, imgPath, Vuetify}) {
       commit('setUser', creds)
       commit('setImgPath', imgPath)
-      dispatch('setTheme', {
-        theme: creds.theme,
-        Vuetify: Vuetify 
-      })
+
+      if (creds.theme !== undefined)
+        dispatch('setTheme', {
+          theme: creds.theme,
+          Vuetify: Vuetify 
+        })
 
       //store the token
       localStorage.setItem('token', token)
