@@ -28,17 +28,21 @@
                 router :to="'/chat/'+f.username">
                     <v-list-item-action>
                         <div class="relative" v-if="f.imgPath">
-                            <v-avatar size="32" class="avatar">
+                            <v-avatar size="32">
                                 <img v-if="f.imgPath" 
                                     :src="`${baseUrl}${f.imgPath}`"/>
                             </v-avatar>
-                            <v-icon small class="bottom-right">mdi-circle</v-icon>
+                            <div class="bottom-right">
+                                <v-icon small>mdi-circle</v-icon>
+                            </div>
                         </div>
                         <div class="relative" v-if="!f.imgPath">
-                            <v-avatar size="32" class="avatar"
+                            <v-avatar size="32"
                                 color="secondary">
                             </v-avatar>
-                            <v-icon small class="bottom-right">mdi-circle</v-icon>
+                            <div class="bottom-right">
+                                <v-icon small>mdi-circle</v-icon>
+                            </div>
                         </div>
                     </v-list-item-action>
                     <v-list-item-title class="caption">
@@ -256,12 +260,7 @@ import FService from '../services/friendsService'
     } 
     .bottom-right{
         position: absolute;
-        top: 0.65rem;
-        right: -0.9rem;
-    }
-    .avatar{
-        position: absolute;
-        top: -0.3rem;
-        right: -0.75rem;
+        top: 1.1rem;
+        right: -0.35rem;
     }
 </style>
