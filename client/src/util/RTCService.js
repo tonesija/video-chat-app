@@ -71,12 +71,14 @@ function onTrack(pc, remoteVideoStream){
 }
 
 function onNegotiationNeeded(pc, reciver, socket){
-  pc.addEventListener('negotiationneeded', async (event) => {
+  let handler = async (event) => {
     console.log('NEGOTIATION NEEDED', event)
     let newOffer = await pc.createOffer()
     await pc.setLocalDescription(newOffer)
     socket.emit('offer', {offer: newOffer, reciver: reciver})
-  })
+    pc.removeEventListener('negotiationneeded', handler)
+  }
+  pc.addEventListener('negotiationneeded', handler)
 }
 
 function setupNewPc(pc, sender, reciver, socket){

@@ -22,7 +22,6 @@
         </v-layout>
       </v-menu>
     </v-row>
-    <v-btn @click="turnOnCamera">Turn camera on</v-btn>
 
     <v-row align="center" justify="center">
       <v-menu offset-y :close-on-content-click="false"
@@ -42,16 +41,16 @@
       </v-menu>
     </v-row>
 
-    <v-row align="end" justify="center">
-      <v-btn icon x-large @click="hangUp(true)">
-        <v-icon x-large color="error">mdi-phone-hangup</v-icon>
-      </v-btn>
-    </v-row>
+    <CallFooter v-on:hangUp="hangUp(true)"
+      v-on:cameraSwitch="manageCamera"
+      @micSwitch="manageMic">
+    </CallFooter>
   </v-container>
 </template>
 
 <script>
 import RTCService from '../util/RTCService'
+import CallFooter from '../components/CallFooter'
 
 export default {
   name: 'Call',
@@ -85,7 +84,9 @@ export default {
       pcSetUp: false,
 
       otherUser: null,
-      volume: 50
+      volume: 50,
+
+      cameraSender: null
     }
   },
 
@@ -163,7 +164,23 @@ export default {
         this.makeCall()
     },
 
+    manageMic(on){
+      if(on)
+        this.videoStream.getAudioTracks()[0].enabled = true
+      else 
+        this.videoStream.getAudioTracks()[0].enabled = false
+    },
+    manageCamera(on){
+      if(on)
+        this.turnOnCamera()
+      else
+        this.videoStream.getVideoTracks()[0].enabled = false
+    },
     turnOnCamera(){
+      if(this.videoStream.getVideoTracks().length != 0){
+        this.videoStream.getVideoTracks()[0].enabled = true
+        return
+      }
       RTCService.onNegotiationNeeded(this.pc, this.otherUser, this.$socket.client)
       navigator.mediaDevices.getUserMedia({video:true})
       .then(stream => {
@@ -171,7 +188,7 @@ export default {
           //add camera track and prepare for renegotiation
           stream.getTracks().forEach(track => {
             this.videoStream.addTrack(track)
-            this.pc.addTrack(track, this.videoStream)
+            this.cameraSender = this.pc.addTrack(track, this.videoStream)
             console.log('Adding track to peer connection!')
           })
       })
@@ -225,6 +242,7 @@ export default {
   },
 
   components: {
+    CallFooter
   }
 }
 </script>

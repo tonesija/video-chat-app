@@ -5,11 +5,11 @@
         xs12>
         <v-card outlined elevation="1" class="mt-2 mr-2 pa-1" :class="{'ml-10 primary primary lighten-1': isAuthorThis(m.user1.username),
                                                                       'mr-10': !isAuthorThis(m.user1.username) }">
-          <v-layout row justify-space-between align-content-space-between class="pa-0 ma-0">
-            <v-flex xs11>
+          <v-layout row justify-end align-start class="pa-0 ma-0">
+            <v-flex xs10 sm11>
               <p class="ma-0 pa-0 subtitle secondary--text font-weight-bold">{{m.user1.username}}</p>
             </v-flex>
-            <v-flex xs1 class="caption grey--text">
+            <v-flex xs2 sm1 class="caption grey--text">
               <p class="ma-0 pa-0">{{formatDate(m.createdAt)}}</p>
             </v-flex>
 
@@ -67,3 +67,7 @@ export default ({
   }
 })
 </script>
+
+<style scoped>
+
+</style>
