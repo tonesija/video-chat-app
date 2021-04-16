@@ -36,8 +36,8 @@
                                 color="secondary">
                             </v-avatar>
                             <div class="bottom-right">
-                                <v-icon :class="{'online--text': statuses.get(f.username),
-                                        'offline--text': !statuses.get(f.username)}"
+                                <v-icon :class="{'online--text': f.status,
+                                        'offline--text': !f.status}"
                                 small
                                 >mdi-circle</v-icon>
                             </div>
@@ -123,9 +123,7 @@ import FService from '../services/friendsService'
                 message: null,
                 alertType: null,
 
-                friends: [],
-                statuses: new Map(),
-                statusInterval: null
+                friends: []
             }
         },
 
@@ -180,6 +178,7 @@ import FService from '../services/friendsService'
                     token: localStorage.getItem('token')
                 })).data
                     this.friends = data.friends
+                    this.askFriendsForStatus()
                 } catch(e){
                     console.log(e)
                 }
@@ -193,9 +192,22 @@ import FService from '../services/friendsService'
             },
 
             askFriendsForStatus(){
+                console.log("asking")
                 for(let f of this.friends){
+                    console.log("asking", f.username)
                     this.$socket.client.emit('get-status', {username: f.username})
                 }
+            },
+
+            setFriendStatus(username, status){
+                let i
+                for(i = 0; i < this.friends.length; ++i){
+                    if (this.friends[i].username === username)
+                        break
+                }
+                let friend = this.friends[i]
+                friend.status = status
+                this.$set(this.friends, i, friend)
             }
         },
 
@@ -224,26 +236,16 @@ import FService from '../services/friendsService'
             },
             status: async function({username, status}){
                 console.log('got status', username, status)
-                this.statuses.set(username, status)
+                this.setFriendStatus(username, status)
             }
-        },
-
-        created: function() {
-            this.askFriendsForStatus()
-            this.statusInterval = setInterval(()=> {
-                this.askFriendsForStatus()
-            }, 6000)
-        },
-
-        destroyed: function(){
-            clearInterval(this.statusInterval)
         },
 
         //on route change
         watch:{
             $route (to, from){
                 console.log('route changed',to , from)
-
+                
+                //izbrisi brojac neprocitanih poruka na stranici tog prijatelja
                 if(to.params.username){
                     let username = to.params.username
                     for(let i = 0; i < this.friends.length; ++i){
@@ -254,6 +256,13 @@ import FService from '../services/friendsService'
                             break
                         }
                     }
+                }
+
+                //ako korisnik nije registriran usmjeri ga
+                if(to.fullPath != "/login" && 
+                    to.fullPath != "/register" && to.fullPath != "/"){
+                    if(!this.$store.state.isLoggedIn)
+                        this.$router.push("/register")
                 }
             }
         }

@@ -120,7 +120,8 @@ import Sidebar from '../components/Sidebar'
         sockets: {
             newMessage: async function(msg) {
                 let from = msg.user1.username
-                if(this.$route.params.username === from) return
+                if(this.$route.params.username == from ||
+                this.$store.state.username == from) return
                 this.newMsgs++
             }
         },

@@ -159,11 +159,8 @@ export default {
       this.pcSetUp = true
       this.$socket.client.emit('pc-setup', {reciver: this.otherUser})
 
-      if(this.$store.state.caller && this.isOtherPcSetUp){
-        //setTimeout(() => {
-          this.makeCall()
-        //}, 1200)
-      }
+      if(this.$store.state.caller && this.isOtherPcSetUp)
+        this.makeCall()
     },
 
     turnOnCamera(){
@@ -171,8 +168,7 @@ export default {
       navigator.mediaDevices.getUserMedia({video:true})
       .then(stream => {
           console.log('Got MediaStream:', stream)
-          //this.videoStream = stream
-          //add the tracks to RTCPeerConnection
+          //add camera track and prepare for renegotiation
           stream.getTracks().forEach(track => {
             this.videoStream.addTrack(track)
             this.pc.addTrack(track, this.videoStream)
@@ -193,11 +189,10 @@ export default {
 
   },
 
-  
-
   created: function() {
     this.otherUser = this.$route.params.username
 
+    
     this.pc = new RTCPeerConnection(this.iceConfiguration)
 
     navigator.mediaDevices.getUserMedia({audio:true})

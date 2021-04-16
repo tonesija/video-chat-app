@@ -164,15 +164,16 @@ module.exports = {
             })
     
             // --- private chat logic ---
-            socket.on('new-message', ({username, msg}) =>{
-                let reciver = getUserId(username)
-                if(reciver){
+            socket.on('new-message', ({sender, reciver, msg}) =>{
+                let reciverId = getUserId(reciver)
+                let senderId = getUserId(sender)
+                if(reciverId){
                     console.log('Sending new msg to ', reciver)
-                    io.to(reciver).emit('newMessage', msg)
+                    io.to(reciverId).emit('newMessage', msg)
+                    io.to(senderId).emit('newMessage', msg)
                 } else {
-                    console.log('Failed to find a reciver.')
+                    console.log('Failed to find a reciver or sender.')
                 }
-                
             })
     
     

@@ -102,11 +102,11 @@ export default {
         id: Math.random() * 10000000,
         createdAt: new Date()
       }
-      this.messages.push(msg)
       this.scrollToBottom('chat-msgs')
 
       this.$socket.client.emit('new-message', {
-        username: this.otherUsername,
+        sender: this.$store.state.username,
+        reciver: this.otherUsername,
         msg: msg
         })
 
@@ -179,7 +179,8 @@ export default {
   sockets: {
     newMessage: async function(msg) {
       console.log('dobijena poruka preko socketa: ', msg)
-      if(msg.user1.username !== this.$route.params.username)
+      if(msg.user1.username != this.$route.params.username
+        && msg.user1.username != this.$store.state.username)
         return
       this.messages.push(msg)
       this.scrollToBottom('chat-msgs')
