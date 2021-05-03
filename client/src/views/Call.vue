@@ -4,17 +4,19 @@
       <v-menu offset-y :close-on-content-click="false"
       rounded="lg" bottom>
         <template v-slot:activator="{ on, attrs }">
-          <video :srcObject.prop="remoteVideoStream" autoplay 
+          <video
+          :srcObject.prop="remoteVideoStream" autoplay 
           playsinline :controls="false"
           width="640" height="480"
           v-bind="{attrs: attrs}"
           v-on="on" :volume="0.0" ref="otherVideo"
+          :poster="`${otherImgUrl}`"
           >
           </video>
         </template>
         <v-layout row justify-center class="primary lighten-3 px-2 pb-0 ma-0">
           <v-flex class="pa-0 ma-0">
-            <p class="subtitle mb-0">{{ otherUser }}</p>
+            <p class="subtitle mb-0">{{ otherUsername }}</p>
             <v-slider v-model="volume" @change="changeVolume"
             dense>
             </v-slider>
@@ -52,6 +54,8 @@
 import RTCService from '../util/RTCService'
 import CallFooter from '../components/CallFooter'
 
+import friendsService from '../services/friendsService'
+
 export default {
   name: 'Call',
 
@@ -83,6 +87,7 @@ export default {
       isOtherPcSetUp: false,
       pcSetUp: false,
 
+      otherUsername: null,
       otherUser: null,
       volume: 50,
 
@@ -98,7 +103,7 @@ export default {
         const answer = await this.pc.createAnswer();
         
         await this.pc.setLocalDescription(answer)
-        this.$socket.client.emit('answer', {answer: answer, reciver: this.otherUser})
+        this.$socket.client.emit('answer', {answer: answer, reciver: this.otherUsername})
       } else if (message.candidate) {
         console.log('Got and ice candidate through message')
         try {
@@ -122,6 +127,11 @@ export default {
   computed: {
     volumeAdj: function(){
       return this.volume/100
+    },
+    otherImgUrl () {
+      if (this.otherUser)
+        return process.env.VUE_APP_ENV_BASE_URL+'/'+this.otherUser.imgPath
+      else return null
     }
   },
 
@@ -143,12 +153,12 @@ export default {
 
       const offer = await this.pc.createOffer(mediaConstraints)
       await this.pc.setLocalDescription(offer)
-      this.$socket.client.emit('offer', {offer: offer, reciver: this.otherUser})
+      this.$socket.client.emit('offer', {offer: offer, reciver: this.otherUsername})
     },
 
     setupPc(){
       // Listen for local ICE candidates on the local RTCPeerConnection
-      RTCService.onIceCandidate(this.pc, this.$socket.client, this.otherUser)
+      RTCService.onIceCandidate(this.pc, this.$socket.client, this.otherUsername)
 
       // Listen for connectionstatechange on the local RTCPeerConnection
       RTCService.oneIceConnectionChange(this.pc)
@@ -158,7 +168,7 @@ export default {
       RTCService.onTrack(this.pc, this.remoteVideoStream)
 
       this.pcSetUp = true
-      this.$socket.client.emit('pc-setup', {reciver: this.otherUser})
+      this.$socket.client.emit('pc-setup', {reciver: this.otherUsername})
 
       if(this.$store.state.caller && this.isOtherPcSetUp)
         this.makeCall()
@@ -181,7 +191,7 @@ export default {
         this.videoStream.getVideoTracks()[0].enabled = true
         return
       }
-      RTCService.onNegotiationNeeded(this.pc, this.otherUser, this.$socket.client)
+      RTCService.onNegotiationNeeded(this.pc, this.otherUsername, this.$socket.client)
       navigator.mediaDevices.getUserMedia({video:true})
       .then(stream => {
           console.log('Got MediaStream:', stream)
@@ -200,15 +210,17 @@ export default {
 
     hangUp(first){
       if(first)
-        this.$socket.client.emit('hang-up', {reciver: this.otherUser})
-      this.$router.push('/chat/'+this.otherUser)
+        this.$socket.client.emit('hang-up', {reciver: this.otherUsername})
+      this.$router.push('/chat/'+this.otherUsername)
     }
 
   },
 
-  created: function() {
-    this.otherUser = this.$route.params.username
-
+  created: async function() {
+    //get the other user info
+    this.otherUsername = this.$route.params.username
+    this.otherUser = (await friendsService.getUser(
+        {username: this.otherUsername})).data.user
     
     this.pc = new RTCPeerConnection(this.iceConfiguration)
 

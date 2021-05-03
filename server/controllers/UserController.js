@@ -319,5 +319,4 @@ module.exports = {
       sendError(res, 'Neočekivana greška', 500)
     }
   }
-
 }
