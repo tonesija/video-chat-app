@@ -38,13 +38,15 @@ module.exports = {
       return
     }
     
-
     console.log(`Registriram korsinika ${creds.username}`)
 
     try {
       try {
-        const dbUser = await User.create(creds)
-        
+        let dbUser = await User.create(creds)
+        dbUser.imgPath = 'profile-images/default-profile.png'
+        dbUser.theme = true
+        await dbUser.save()
+
         sendResponse(res, {
           user: formatUser(dbUser),
           token: jwtSingUser(dbUser.toJSON())

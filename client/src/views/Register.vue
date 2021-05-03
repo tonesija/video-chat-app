@@ -109,6 +109,10 @@ export default {
           token: data.token
         })
 
+        this.$store.dispatch('changeProfileImg', {
+          newImgUrl: data.user.imgPath
+        })
+
         this.$router.push('/')
       } catch (e) {
         this.errorMsg = e.response.data.message

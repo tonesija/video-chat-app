@@ -123,14 +123,14 @@ import FService from '../services/friendsService'
                 message: null,
                 alertType: null,
 
-                friends: []
+                friends: [],
+                friendsSet: null
             }
         },
 
         props: {
             value: Boolean
         },
-
 
         computed: {
             size () {
@@ -174,10 +174,13 @@ import FService from '../services/friendsService'
 
             async getFriends(){
                 try {
-                let data = (await FService.getFriends({
-                    token: localStorage.getItem('token')
-                })).data
+                    let data = (await FService.getFriends({
+                        token: localStorage.getItem('token')
+                    })).data
                     this.friends = data.friends
+                    this.friendsSet = new Set()
+                    for(let f of this.friends)
+                        this.friendsSet.add(f.username)
                     this.askFriendsForStatus()
                 } catch(e){
                     console.log(e)
@@ -200,6 +203,8 @@ import FService from '../services/friendsService'
             },
 
             setFriendStatus(username, status){
+                if(!this.friendsSet.has(username))
+                    return
                 let i
                 for(i = 0; i < this.friends.length; ++i){
                     if (this.friends[i].username === username)
