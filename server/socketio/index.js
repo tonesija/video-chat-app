@@ -178,7 +178,7 @@ module.exports = {
     
     
             // --- room logic ---
-            socket.on('join-room', ({roomName, username}) => {
+            /*socket.on('join-room', ({roomName, username}) => {
                 console.log(username + ' joined room ' + roomName)
                 
                 const user = userJoin(socket.id, username, roomName)
@@ -216,7 +216,7 @@ module.exports = {
                 } else {
                     console.log('Someone disconnected!')
                 }
-            })
+            })*/
             socket.on('disconnect', function() {
                 const user = userLeave(socket.id)
                 console.log('user:', user)

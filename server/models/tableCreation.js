@@ -18,9 +18,20 @@ module.exports = (sequelize, DataTypes) => {
 
   
   const ChatMessage = sequelize.define('ChatMessage', {
-    content: {
-      type: DataTypes.STRING
-    }
+    content: DataTypes.STRING
+  })
+
+  const Notification = sequelize.define('Notification', {
+    title: DataTypes.STRING,
+    content: DataTypes.STRING,
+    read: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    type: DataTypes.ENUM('request', 'notification'),
+    hasImg: DataTypes.BOOLEAN,
+    imgPath: DataTypes.STRING,
+    otherUserUsername: DataTypes.STRING
   })
 
 
@@ -31,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
   ChatMessage.belongsTo(User, {as: 'user1'})
   ChatMessage.belongsTo(User, {as: 'user2'})
 
-  
+  User.hasMany(Notification)
   /*User.hasOne(Doctor, {foreignKey: 'userId'})
   User.hasOne(CloseContact, {foreignKey: 'userId', as: 'User'})
   User.hasMany(Messages, {as: 'Messages', foreignKey: 'userId'})
@@ -51,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
   const tables = []
   tables.push(User)
   tables.push(ChatMessage)
-
+  tables.push(Notification)
 
   return tables
 }
