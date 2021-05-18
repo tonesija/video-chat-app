@@ -26,17 +26,26 @@
                 {{$store.state.username}}
             </span>
         </v-toolbar-title>
+
+        <v-menu offset-y v-if="this.$store.state.isLoggedIn"
+            rounded="lg">
+            <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                    v-bind="attrs" v-on="on" icon
+                    color="accent">
+                    <v-icon>mdi-bell</v-icon>
+                </v-btn>
+            </template>
+            <NotificationList></NotificationList>
+        </v-menu>
         
         <v-menu offset-y v-if="this.$store.state.isLoggedIn"
             rounded="lg">
             <template v-slot:activator="{ on, attrs }">
                 <v-btn
-                v-bind="attrs"
-                v-on="on"
-                icon large
-                color="accent"
-                >
-                <v-icon>mdi-chevron-down</v-icon>
+                    v-bind="attrs" v-on="on"
+                    icon large color="accent">
+                    <v-icon>mdi-chevron-down</v-icon>
                 </v-btn>
             </template>
             <v-list>
@@ -80,6 +89,7 @@
 
 <script>
 import Sidebar from '../components/Sidebar'
+import NotificationList from '../components/NotificationList'
 
     export default {
         data() {
@@ -127,7 +137,8 @@ import Sidebar from '../components/Sidebar'
         },
 
         components: {
-            Sidebar
+            Sidebar,
+            NotificationList
         }
     }
 </script>
