@@ -9,23 +9,28 @@ function sendError(res, message, status){
 
 function getFileName(originalName){
   originalName = removeSpaces(originalName)
-  let now = new Date()
-  let year = now.getFullYear()
-  let month = now.getMonth()
-  let day = now.getDay()
-  let hour = now.getHours()
-  let minute = now.getMinutes()
   originalName = Date.now()+originalName
   return originalName
 }
 
-function removeSpaces (path) {
-  return path.replace(/\s/g , "-");
+function removeSpaces(str) {
+  return str.replace(/\s/g , "-");
+}
+
+//formatiraj korisnika za odgovor (ukloni lozinku)
+function formatUser(user){
+  return {
+    username: user.username,
+    email: user.email,
+    imgPath: user.imgPath,
+    theme: user.theme
+  }
 }
 
 module.exports = {
   sendResponse,
   sendError,
   getFileName,
-  removeSpaces
+  removeSpaces,
+  formatUser
 }

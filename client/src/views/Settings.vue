@@ -4,7 +4,6 @@
       <p class="secondary--text font-weight-bold display-1"
         ><span><v-icon color="secondary" class="mr-3" large>
           mdi-cog</v-icon></span>Postavke</p>
-      
 
       <p v-show="$store.state.imgPath" 
         class="mb-0 secondary--text font-weight-light">Promijeni profilnu</p>
@@ -29,6 +28,7 @@
         </template>
       </v-file-input>
 
+      <div class="mt-4"></div>
       <p v-show="lightTheme" 
         class="mb-0 secondary--text font-weight-light">Svijetla tema</p>
       <p v-show="!lightTheme"

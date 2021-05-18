@@ -1,25 +1,10 @@
 const {User, ChatMessage} = require('../models')
-const jwt = require('jsonwebtoken')
-const config = require('../config')
 
-const { Op } = require("sequelize");
+//operatori OR, AND... za sql
+const {Op} = require("sequelize");
 
 const {sendResponse, sendError} = require('../util')
-
-
-//vraća jwt
-function jwtSingUser (dbUser) {
-  return jwt.sign(dbUser, config.authentication.jwtSecret, {
-      expiresIn: '7d'
-  })
-}
-
-//vraća korisnika
-function jwtVerifyUser (token) {
-  return jwt.verify(token, config.authentication.jwtSecret)
-}
-
-
+const {jwtVerifyUser} = require('../authentication')
 
 module.exports = {
   async sendMessage (req, res) {
@@ -65,7 +50,6 @@ module.exports = {
         //TODO: provjeri jesu li prijatelji
 
         //stvaranje poruke u bazi
-        console.log('Poruka se sprema u bazu.')
         let newMsg = await ChatMessage.create({
           content: pl.content,
           user1Id: sender.id,
@@ -125,7 +109,6 @@ module.exports = {
 
         //TODO: provjeri jesu li prijatelji
 
-        console.log('Dohvaćanje poruka iz baze')
         let msgs = await ChatMessage.findAll({
           where: {
             user1Id: {

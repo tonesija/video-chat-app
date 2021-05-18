@@ -1,35 +1,8 @@
 const {User} = require('../models')
-const jwt = require('jsonwebtoken')
-const config = require('../config')
 
-const {sendResponse, sendError} = require('../util')
-const { sendFriendNotif } = require('../socketio')
-
-const {getFileName} = require('../util/index')
-
-//vraća jwt
-function jwtSingUser (dbUser) {
-  return jwt.sign(dbUser, config.authentication.jwtSecret, {
-      expiresIn: '7d'
-  })
-}
-
-//vraća korisnika
-function jwtVerifyUser (token) {
-  return jwt.verify(token, config.authentication.jwtSecret)
-}
-
-//formatiraj korisnika za odgovor (ukloni lozinku)
-function formatUser(user){
-  return {
-    username: user.username,
-    email: user.email,
-    imgPath: user.imgPath,
-    theme: user.theme
-  }
-}
-
-function removeSpaces (path) {return path.replace(/\s/g , "-");}
+const {sendResponse, sendError, formatUser} = require('../util')
+const {sendFriendNotif} = require('../socketio')
+const {jwtSingUser, jwtVerifyUser} = require('../authentication')
 
 module.exports = {
   async register (req, res) {
