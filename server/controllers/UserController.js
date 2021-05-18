@@ -5,6 +5,8 @@ const config = require('../config')
 const {sendResponse, sendError} = require('../util')
 const { sendFriendNotif } = require('../socketio')
 
+const {getFileName} = require('../util/index')
+
 //vraća jwt
 function jwtSingUser (dbUser) {
   return jwt.sign(dbUser, config.authentication.jwtSecret, {
@@ -306,8 +308,7 @@ module.exports = {
       })
 
       //postavi mu put
-      let imgName = removeSpaces(req.files['img'][0].filename)
-
+      let imgName = req.files['img'][0].filename
       user.imgPath = `profile-images/${imgName}`
       await user.save()
 

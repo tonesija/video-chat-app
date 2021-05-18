@@ -10,11 +10,14 @@
         class="mb-0 secondary--text font-weight-light">Promijeni profilnu</p>
       <p v-show="!$store.state.imgPath"
         class="mb-0 secondary--text font-weight-light">Postavi profilnu</p>
+      
       <v-file-input accept="image/*" color="accent"
         prepend-icon="mdi-file" 
         @change="onNewImage" 
         :error="imgError" :error-messages="errorMsg"
-        name="img" class="mt-0 pt-0"
+        :success="imgSuccess" :success-messages="successMsg"
+        name="img" class="mt-0 pt-0" :show-size="true"
+        :rules="rules"
         >
         <template slot="append-outer">
           <v-btn icon @click="sendNewImage"
@@ -46,6 +49,12 @@ export default {
       newImage: null,
       imgError: false,
       errorMsg: null,
+      imgSuccess: false,
+      successMsg: null,
+      rules: [
+        value => !value || value.size < 1*1000*1000 || 
+        "Slika treba biti manja od 1 MB!"
+      ],
 
       lightTheme: this.$store.state.lightTheme
     }
@@ -56,11 +65,11 @@ export default {
       this.newImage = img
       this.errorMsg = null
       this.imgError = false
-      console.log(img)
+      this.successMsg = null
+      this.imgSuccess = false
     },
 
     async sendNewImage(){
-      console.log('Setting new image')
       if(!this.newImage){
         this.imgError = true
         this.errorMsg = 'Niste odabrali sliku.'
@@ -70,15 +79,19 @@ export default {
       fd.append('img', this.newImage)
       let token = localStorage.getItem('token')
       fd.append('token', token)
-      console.log(fd)
 
-      let data = (await settings.setNewProfileImg(fd)).data
+      try {
+        let data = (await settings.setNewProfileImg(fd)).data
+        this.successMsg = "Nova slika je postavljena."
+        this.imgSucess = true
 
-      this.$store.dispatch('changeProfileImg', {
-        newImgUrl: data.path
-      })
-    
-      console.log(data)
+        this.$store.dispatch('changeProfileImg', {
+          newImgUrl: data.path
+        })
+      } catch(e){
+        this.imgError = true
+        this.errorMsg = 'Slika treba biti manja od 1 MB!'
+      }
     },
 
     changeTheme(){
@@ -86,7 +99,6 @@ export default {
         theme: this.lightTheme,
         Vuetify: this.$vuetify 
       })
-      console.log(this.$store.state.lightTheme)
       settings.setTheme({theme: this.lightTheme,
         token: localStorage.getItem('token')})
     }
