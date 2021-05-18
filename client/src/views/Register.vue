@@ -59,8 +59,6 @@
       </v-container>
     </v-container>
   </div>
-
-
 </template>
 
 <script>
@@ -80,12 +78,10 @@ export default {
       nameRules: [
         v => !!v || 'Korisničko ime je obavezno'
       ],
-
       emailRules: [
         v => !!v || 'E-mail je obavezan',
         v => /.+@.+/.test(v) || 'E-mail mora biti ispravan',
       ],
-
       passwordRules: [
         v => !!v || 'Lozinka je obavezna'
       ]
@@ -106,13 +102,9 @@ export default {
         this.$store.dispatch('setUser', {
           creds: {username: data.user.username,
           email: data.user.email},
+          imgPath: data.user.imgPath,
           token: data.token
         })
-
-        this.$store.dispatch('changeProfileImg', {
-          newImgUrl: data.user.imgPath
-        })
-
         this.$router.push('/')
       } catch (e) {
         this.errorMsg = e.response.data.message
@@ -122,12 +114,6 @@ export default {
     goToLogin() {
       this.$router.push('/login')
     }
-  },
-
-  created: function() {
-  },
-
-  destroyed: function() {
   },
 
   components: {

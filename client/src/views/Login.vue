@@ -50,7 +50,6 @@
             >
               Nemaš račun?
             </v-btn>
-
       </v-container>
     </v-container>
   </div>
@@ -72,7 +71,6 @@ export default {
       nameRules: [
         v => !!v || 'Korisničko ime je obavezno'
       ],
-
       passwordRules: [
         v => !!v || 'Lozinka je obavezna'
       ]
@@ -87,7 +85,6 @@ export default {
           username: this.username,
           password: this.password
         })).data
-
         //postavi korisnika u vuex
         this.$store.dispatch('setUser', {
           creds: {username: data.user.username,
@@ -97,7 +94,6 @@ export default {
           imgPath: data.user.imgPath,
           Vuetify: this.$vuetify
         })
-
         this.$router.push('/')
       } catch (e) {
         this.errorMsg = e.response.data.message
@@ -109,17 +105,7 @@ export default {
     }
   },
 
-  created: function() {
-  },
-
-  destroyed: function() {
-  },
-
   components: {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

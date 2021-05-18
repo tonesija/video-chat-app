@@ -43,7 +43,7 @@ module.exports = {
     try {
       try {
         let dbUser = await User.create(creds)
-        dbUser.imgPath = 'profile-images/default-profile.png'
+        dbUser.imgPath = 'default-profile.png'
         dbUser.theme = true
         await dbUser.save()
 
