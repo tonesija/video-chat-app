@@ -27,17 +27,7 @@
             </span>
         </v-toolbar-title>
 
-        <v-menu offset-y v-if="this.$store.state.isLoggedIn"
-            rounded="lg">
-            <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                    v-bind="attrs" v-on="on" icon
-                    color="accent">
-                    <v-icon>mdi-bell</v-icon>
-                </v-btn>
-            </template>
-            <NotificationList></NotificationList>
-        </v-menu>
+        <NotificationMenu></NotificationMenu>
         
         <v-menu offset-y v-if="this.$store.state.isLoggedIn"
             rounded="lg">
@@ -89,7 +79,7 @@
 
 <script>
 import Sidebar from '../components/Sidebar'
-import NotificationList from '../components/NotificationList'
+import NotificationMenu from '../components/NotificationMenu'
 
     export default {
         data() {
@@ -138,7 +128,7 @@ import NotificationList from '../components/NotificationList'
 
         components: {
             Sidebar,
-            NotificationList
+            NotificationMenu
         }
     }
 </script>

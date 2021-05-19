@@ -32,6 +32,9 @@ module.exports = (app) => {
     app.post('/readNotificiation',
         NotificationController.readNotification
     )
+    app.post('/removeNotification',
+        NotificationController.removeNotifcation
+    )
     app.post('/sendFriendRequest',
         NotificationController.sendFriendRequest
     )

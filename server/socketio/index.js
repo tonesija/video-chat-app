@@ -21,11 +21,39 @@ function sendFriendNotif(username) {
     }
 }
 
+function sendNotif(username) {
+    console.log("Sending notification to: ", username)
+
+    let reciverId = getUserId(username)
+    if(reciverId){
+        let message = {
+        }
+        innerIo.to(reciverId).emit('notification', message)
+    } else {
+        console.log('Failed to find a reciver.')
+    }
+}
+
+function updateYourNotifs(username) {
+    console.log("Telling to update notifs: ", username)
+
+    let reciverId = getUserId(username)
+    if(reciverId){
+        let message = {
+        }
+        innerIo.to(reciverId).emit('updateNotifications', message)
+    } else {
+        console.log('Failed to find a reciver.')
+    }
+}
+
 
 //socket io emit cheetsheet:
 //https://socket.io/docs/v3/emit-cheatsheet/index.html
 module.exports = {
     sendFriendNotif: sendFriendNotif,
+    sendNotif: sendNotif,
+    updateYourNotifs: updateYourNotifs,
     initializeIo: io => {
         innerIo = io
         io.on('connection', (socket) => {

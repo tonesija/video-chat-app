@@ -9,5 +9,10 @@ export default {
   },
   async getUser(payload){
     return api().post('getUser', payload)
+  },
+  async sendFriendRequest(otherUsername){
+    let token = localStorage.getItem('token')
+    return api().post('/sendFriendRequest', 
+      {token: token, otherUsername: otherUsername})
   }
 }

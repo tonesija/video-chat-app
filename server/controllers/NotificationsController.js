@@ -1,7 +1,7 @@
 const {User, Notification} = require('../models')
 
 const {sendResponse, sendError} = require('../util')
-const {sendFriendNotif} = require('../socketio')
+const {sendFriendNotif, sendNotif, updateYourNotifs} = require('../socketio')
 const {jwtVerifyUser} = require('../authentication')
 
 function createFriendRequest(sender) {
@@ -13,6 +13,18 @@ function createFriendRequest(sender) {
     imgPath: sender.imgPath,
     otherUserUsername: sender.username
   }
+}
+async function createFriendAccept(user, sender) {
+  let notif = {
+    title: 'Zahtjev prihvaćen',
+    content: `${sender.username} je prihvatio vaš zahtjev`,
+    type: 'notification',
+    hasImg: true,
+    imgPath: sender.imgPath,
+    otherUserUsername: sender.username
+  }
+  let notifBase = await Notification.create(notif)
+  await user.addNotification(notifBase)
 }
 
 module.exports = {
@@ -41,8 +53,10 @@ module.exports = {
         }
       })
       let notifications = user.Notifications
-      if(notifications.lenght != 1)
+      if(notifications.length != 1){
         sendError(res, 'Neočekivana greška', 500)
+        return
+      }
       
       notification[0].read = true
       await notification[0].save()
@@ -55,6 +69,50 @@ module.exports = {
       sendError(res, 'Neočekivana greška', 500)
     }
   },
+  async removeNotifcation(req, res) {
+    let token = req.body.token
+    let notifID = req.body.notifID
+
+    console.log(notifID)
+
+    try{
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+      
+      user = await User.findOne({
+        where: {
+          username: user.username
+        },
+        include: {
+          model: Notification,
+          as: 'Notifications',
+          where:{
+            id: notifID
+          }
+        }
+      })
+      let notifications = user.Notifications
+      console.log(notifications)
+      if(notifications.length != 1){
+        sendError(res, 'Neočekivana greška', 500)
+        return
+      }
+      
+      await notifications[0].destroy()
+
+      sendResponse(res, {
+        message: "Uspjeh."
+      })
+    }catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+
 
   async getNotifications(req, res) {
     let token = req.body.token
@@ -129,8 +187,9 @@ module.exports = {
       if(otherUser){
         let notification = await Notification.create(createFriendRequest(user))
         await otherUser.addNotification(notification)
+        sendNotif(otherUser.username)
         sendResponse(res, {
-          message: `${otherUsername} je sada vaš prijatelj.`
+          message: `Poslali ste zahtjev korisniku ${otherUsername}.`
         })
       } else {
         sendError(res, 'Taj korisnik ne postoji.', 400)
@@ -174,9 +233,13 @@ module.exports = {
           if(otherUser){
             await user.addFriend(otherUser)
             await otherUser.addFriend(user)
-    
-            //TODO send friend accept notif
             await notification.destroy()
+
+            await createFriendAccept(otherUser, user)
+            sendFriendNotif(user.username)
+            sendFriendNotif(otherUsername)
+            updateYourNotifs(user.username)
+            sendNotif(otherUsername)
 
             sendResponse(res, {
               message: `${otherUsername} je sada vaš prijatelj.`

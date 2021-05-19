@@ -155,10 +155,7 @@ import FService from '../services/friendsService'
         methods: {
             async addFriend(){
                 try {
-                    let data = (await FService.addFriend({
-                        token: localStorage.getItem('token'),
-                        otherUsername: this.newFriendUsername
-                    })).data
+                    let data = (await FService.sendFriendRequest(this.newFriendUsername)).data
                     this.alertType = 'success'
                     this.message = data.message
                     this.getFriends()
@@ -169,7 +166,6 @@ import FService from '../services/friendsService'
                 setTimeout(() => {
                     this.message = null
                 }, 1600)
-                console.log(this.$store.state.username + ' dodaje ' + this.newFriendUsername)
             }, 
 
             async getFriends(){
@@ -203,6 +199,7 @@ import FService from '../services/friendsService'
             },
 
             setFriendStatus(username, status){
+                if(!this.friendsSet) return
                 if(!this.friendsSet.has(username))
                     return
                 let i

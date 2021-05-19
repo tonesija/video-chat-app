@@ -1,7 +1,8 @@
 <template>
   <v-container class="notification-list">
     <div v-for="n in notifications" :key="n.key">
-      <Notification :notification="n"></Notification>
+      <Notification :notification="n"
+        @update="getNotifications"></Notification>
     </div>
   </v-container>
 </template>
@@ -18,21 +19,26 @@ export default {
   },
 
   methods: {
-  
+    async getNotifications(){
+      try{
+        let data = (await notificationService.getNotifications()).data
+        this.notifications = data.notifications
+        console.log(data.notifications)
+      } catch(e){
+        console.log(e)
+      }
+    }
   },
 
   sockets: {
-    //realtime dobivanje notifikacija
+    notification: async function(){
+      console.log('nove notifikacija')
+      this.getNotifications()
+    }
   },
 
   created: async function() {
-    try{
-      let data = (await notificationService.getNotifications()).data
-      this.notifications = data.notifications
-      console.log(data.notifications)
-    } catch(e){
-      console.log(e)
-    }
+    this.getNotifications()
   },
 
   components: {
@@ -40,3 +46,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  .notification-list {
+    background-color: rgb(255,255,255,0.8);
+  }
+</style>
