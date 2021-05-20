@@ -4,6 +4,12 @@
       <Notification :notification="n"
         @update="getNotifications"></Notification>
     </div>
+    <v-row justify="center" class="mt-1">
+      <p class="secondary--text subtitle font-weight-light"
+          v-show="notifications.length == 0">
+          Lista notifikacija je prazna
+      </p>
+    </v-row>
   </v-container>
 </template>
 
@@ -31,8 +37,10 @@ export default {
   },
 
   sockets: {
+    updateNotifications: async function(){
+      this.getNotifications()
+    },
     notification: async function(){
-      console.log('nove notifikacija')
       this.getNotifications()
     }
   },

@@ -37,26 +37,13 @@ module.exports = (sequelize, DataTypes) => {
 
   //------ DEFINIRANJE VEZA ------
 
-  User.belongsToMany(User, {through: Friends, as: 'Friend', foreignKey: 'username'})
+  User.belongsToMany(User, {through: Friends, 
+    as: 'Friend', foreignKey: 'username'})
   
   ChatMessage.belongsTo(User, {as: 'user1'})
   ChatMessage.belongsTo(User, {as: 'user2'})
 
   User.hasMany(Notification)
-  /*User.hasOne(Doctor, {foreignKey: 'userId'})
-  User.hasOne(CloseContact, {foreignKey: 'userId', as: 'User'})
-  User.hasMany(Messages, {as: 'Messages', foreignKey: 'userId'})
-
-  Doctor.belongsTo(User, {foreignKey: 'userId'})
-  Doctor.hasMany(Patient, {as: 'Patients', foreignKey: 'doctorId'})
-
-  Patient.belongsTo(User, {foreignKey: 'userId', as: 'User'})
-  Patient.hasMany(Entry, {as: 'Entries', foreignKey: 'userId'})
-  //primjer:
-  //patient.addCloseContact(closeContact)
-  //closeContact.addPatient(patient)
-  Patient.belongsToMany(CloseContact, {through: LooksAfter})
-  CloseContact.belongsToMany(Patient, {through: LooksAfter})*/
 
   //------ STAVLJANJE U EXPORT POLJE ------
   const tables = []
