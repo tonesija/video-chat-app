@@ -67,6 +67,7 @@ module.exports = (sequelize, DataTypes) => {
   tables.push(Notification)
   tables.push(GroupChatMessage)
   tables.push(Group)
+  tables.push(GroupMembers)
 
   return tables
 }

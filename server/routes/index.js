@@ -61,6 +61,9 @@ module.exports = (app) => {
     app.post('/sendGroupRequest', 
         GroupController.sendGroupRequest
     )
+    app.post('/acceptGroupRequest', 
+        GroupController.acceptGroupRequest
+    )
 
     app.post('/getMessages',
         ChatController.getMessages

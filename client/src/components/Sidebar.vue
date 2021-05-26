@@ -111,11 +111,13 @@
             </p>
         </v-row>
     </v-container>
+    <Groups v-show="$store.state.isLoggedIn"></Groups>
     </v-navigation-drawer>
 </template>
 
 <script>
 import FService from '../services/friendsService'
+import Groups from './Groups'
     export default {
         data() {
             return {
@@ -267,6 +269,9 @@ import FService from '../services/friendsService'
                         this.$router.push("/register")
                 }
             }
+        },
+        components:{
+            Groups
         }
     }
 </script>

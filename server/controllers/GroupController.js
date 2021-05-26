@@ -1,6 +1,6 @@
-const {User, Notification, Group, GroupChatMessage, GroupMember} = require('../models')
+const {User, Notification, Group, GroupChatMessage, GroupMembers} = require('../models')
 
-const {sendResponse, sendError} = require('../util')
+const {sendResponse, sendError, printMethods} = require('../util')
 const {sendGroupNotif, sendNotif, updateYourNotifs} = require('../socketio')
 const {jwtVerifyUser} = require('../authentication')
 
@@ -19,30 +19,21 @@ function createGroup(groupName) {
     name: groupName
   }
 }
-async function createGroupAccept(group, sender, user) {
-  let notif = {
-    title: 'Zahtjev za grupu prihvaćen',
-    content: `${sender.username} je prihvatio vaš zahtjev za grupu ${group.name}`,
-    type: 'notification',
-    hasImg: true,
-    imgPath: sender.imgPath
+
+//TODO popravi ovo pls
+async function getGroups(user) {
+  let groups = await GroupMembers.findAll({
+    where: {
+      UserId: user.id
+    }
+  })
+  toReturn = []
+  for(i of groups){
+    toReturn.push(await Group.findByPk(i.GroupId))
   }
-  let notifBase = await Notification.create(notif)
-  await user.addNotification(notifBase)
+  return toReturn
 }
 
-function printMethods(obj) {
-  for (var id in obj) {
-    try {
-      if (typeof(obj[id]) == "function") {
-        console.log(id + ": " + obj[id].toString());
-      }
-    } catch (err) {
-      console.log(id + ": inaccessible");
-    }
-  }
-  console.log()
-}
 
 module.exports = {
   async createGroup(req, res) {
@@ -116,17 +107,8 @@ module.exports = {
         return
       }
 
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: Group,
-          as: 'Groups'
-        }
-      })
-      let groups = user.Groups
-        
+      let groups = await getGroups(user)
+      console.log(groups)
       sendResponse(res, {
         groups: groups
       })
@@ -222,18 +204,17 @@ module.exports = {
 
       for(let notification of notifications){
         if(groupId === notification.groupId){
-          let group = await Group.findByPk(groupId)
-    
+          let group = await Group.findByPk(groupId)    
           if(group){
             await group.addUser(user)
 
             await notification.destroy()
-
+            
             updateYourNotifs(user.username)
             sendGroupNotif(user.username)
 
             sendResponse(res, {
-              message: `Pridružili ste se grupi ${group.anem}.`
+              message: `Pridružili ste se grupi ${group.name}.`
             })
           } else {
             sendError(res, 'Ta grupa ne postoji.', 400)

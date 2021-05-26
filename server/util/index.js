@@ -27,10 +27,26 @@ function formatUser(user){
   }
 }
 
+//DEBUG
+function printMethods(obj) {
+  console.log()
+  for (var id in obj) {
+    try {
+      if (typeof(obj[id]) == "function") {
+        console.log(id + ": " + obj[id].toString())
+      }
+    } catch (err) {
+      console.log(id + ": inaccessible")
+    }
+  }
+  console.log()
+}
+
 module.exports = {
   sendResponse,
   sendError,
   getFileName,
   removeSpaces,
-  formatUser
+  formatUser,
+  printMethods
 }
