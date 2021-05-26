@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {timestamps: false})
 
   const Friends = sequelize.define('Friends')
-
   
   const ChatMessage = sequelize.define('ChatMessage', {
     content: DataTypes.STRING
@@ -34,9 +33,17 @@ module.exports = (sequelize, DataTypes) => {
     otherUserUsername: DataTypes.STRING
   })
 
+  const GroupChatMessage = sequelize.define('GroupChatMessage', {
+    content: DataTypes.STRING
+  })
+
+  const Group = sequelize.define('Group', {
+    name: DataTypes.STRING
+  })
+
+  const GroupMembers = sequelize.define('GroupMembers')
 
   //------ DEFINIRANJE VEZA ------
-
   User.belongsToMany(User, {through: Friends, 
     as: 'Friend', foreignKey: 'username'})
   
@@ -45,11 +52,20 @@ module.exports = (sequelize, DataTypes) => {
 
   User.hasMany(Notification)
 
+  Group.belongsToMany(User, {through: GroupMembers})
+
+  User.hasMany(Group, {foreignKey: 'creatorId'})
+
+  Group.hasMany(GroupChatMessage)
+  GroupChatMessage.belongsTo(User)
+
   //------ STAVLJANJE U EXPORT POLJE ------
   const tables = []
   tables.push(User)
   tables.push(ChatMessage)
   tables.push(Notification)
+  tables.push(GroupChatMessage)
+  tables.push(Group)
 
   return tables
 }

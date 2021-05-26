@@ -1,6 +1,7 @@
 const UserController = require('../controllers/UserController')
 const ChatController = require('../controllers/ChatController')
 const NotificationController = require('../controllers/NotificationsController')
+const GroupController = require('../controllers/GroupController')
 
 const {cpUpload} = require('../storage')
 
@@ -38,14 +39,24 @@ module.exports = (app) => {
     app.post('/sendFriendRequest',
         NotificationController.sendFriendRequest
     )
-    app.post('/addFriend',
-        NotificationController.addFriend
-    )
     app.post('/getFriends',
         UserController.getFriends
     )
     app.post('/getUser',
         UserController.getUser
+    )
+
+    app.post('/createGroup', 
+        GroupController.createGroup
+    )
+    app.post('/deleteGroup', 
+        GroupController.deleteGroup
+    )
+    app.post('/getGroups', 
+        GroupController.getGroups
+    )
+    app.post('/getGroupMembers', 
+        GroupController.getGroupMembers
     )
 
     app.post('/getMessages',
