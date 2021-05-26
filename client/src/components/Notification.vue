@@ -12,13 +12,20 @@
     </p>
 
     <p class="secondary--text mb-0 pb-0">{{notification.content}}</p>
-    <div v-show="notification.type === 'request'">
+    <div v-show="notification.type == 'request'">
       <v-btn x-small color="success" @click="acceptFriend">
         Prihvati</v-btn>
 
-
       <v-btn x-small color="error" class="ml-1" outlined
         @click="declineFriend">
+        Odbaci</v-btn>
+    </div>
+    <div v-show="notification.type == 'groupRequest'">
+      <v-btn x-small color="success" @click="acceptGroupRequest">
+        Prihvati</v-btn>
+
+      <v-btn x-small color="error" class="ml-1" outlined
+        @click="declineGroupRequest">
         Odbaci</v-btn>
     </div>
   </v-container>
@@ -49,8 +56,21 @@ export default {
     async declineFriend(){
       await notificationService.removeNotification(this.notification.id)
       this.$emit('update')
-    }
+    },
 
+    async acceptGroupRequest(){
+      //let groupId = this.notification.groupId
+      try{
+        //TODO
+        //await notificationService.acceptFriend(otherUsername)
+      } catch(e){
+        console.log(e)
+      }
+    },
+    async declineGroupRequest(){
+      await notificationService.removeNotification(this.notification.id)
+      this.$emit('update')
+    }
   }
 }
 </script>

@@ -27,10 +27,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false
     },
-    type: DataTypes.ENUM('request', 'notification'),
+    type: DataTypes.ENUM('request', 'notification', 'groupRequest'),
     hasImg: DataTypes.BOOLEAN,
     imgPath: DataTypes.STRING,
-    otherUserUsername: DataTypes.STRING
+    otherUserUsername: DataTypes.STRING,
+    groupId: DataTypes.INTEGER
   })
 
   const GroupChatMessage = sequelize.define('GroupChatMessage', {

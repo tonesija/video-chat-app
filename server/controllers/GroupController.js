@@ -1,17 +1,17 @@
 const {User, Notification, Group, GroupChatMessage, GroupMember} = require('../models')
 
 const {sendResponse, sendError} = require('../util')
-const {sendFriendNotif, sendNotif, updateYourNotifs} = require('../socketio')
+const {sendGroupNotif, sendNotif, updateYourNotifs} = require('../socketio')
 const {jwtVerifyUser} = require('../authentication')
 
-function createFriendRequest(sender) {
+function createGroupRequest(sender, group) {
   return {
-    title: 'Zahtjev za prijateljstvo',
-    content: `${sender.username} vam šalje zahtjev za prijateljstvo`,
-    type: 'request',
+    title: 'Zahtjev za grupu',
+    content: `${sender} želi da se pridružite grupi ${group.name}.`,
+    type: 'groupRequest',
     hasImg: true,
     imgPath: sender.imgPath,
-    otherUserUsername: sender.username
+    groupId: group.id
   }
 }
 function createGroup(groupName) {
@@ -19,14 +19,13 @@ function createGroup(groupName) {
     name: groupName
   }
 }
-async function createFriendAccept(user, sender) {
+async function createGroupAccept(group, sender, user) {
   let notif = {
-    title: 'Zahtjev prihvaćen',
-    content: `${sender.username} je prihvatio vaš zahtjev`,
+    title: 'Zahtjev za grupu prihvaćen',
+    content: `${sender.username} je prihvatio vaš zahtjev za grupu ${group.name}`,
     type: 'notification',
     hasImg: true,
-    imgPath: sender.imgPath,
-    otherUserUsername: sender.username
+    imgPath: sender.imgPath
   }
   let notifBase = await Notification.create(notif)
   await user.addNotification(notifBase)
@@ -159,9 +158,96 @@ module.exports = {
       sendError(res, 'Neočekivana greška', 500)
     }
   },
+  async sendGroupRequest(req, res) {
+    let token = req.body.token
+    let groupId = req.body.groupId
+    let reciver = req.body.reciver
+    console.log(reciver)
 
-  //TODO groupe invite (notification)
-  //TODO accept group invite
-  //TODO ovo gori sa socketima
+    try{
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+      if(user.username === reciver){
+        sendError(res, 'Ne možete dodati sebe u grupu.', 400)
+        return
+      }
+      //TODO provjeriti jeli korisnik vec u grupi
+      let group = await Group.findByPk(groupId)
+      let reciverUser = await User.findOne({
+        where:{username: reciver}
+      })
+      let groupRequest = createGroupRequest(user.username, group)
+
+      if(reciverUser){
+        let notification = await Notification.create(groupRequest)
+        await reciverUser.addNotification(notification)
+        sendNotif(reciverUser.username)
+        sendResponse(res, {
+          message: `Poslali ste zahtjev korisniku ${reciver}.`
+        })
+      } else {
+        sendError(res, 'Taj korisnik ne postoji.', 400)
+      }
+    }catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+  async acceptGroupRequest (req, res) {
+    let token = req.body.token
+    let groupId = req.body.groupId
+    
+    try {
+      let user = jwtVerifyUser(token)
+
+      if(!user){
+        sendError(res, 'Greška u autentifikaciji.', 400)
+        return
+      }
+
+      user = await User.findOne({
+        where: {
+          username: user.username
+        },
+        include: {
+          model: Notification,
+          as: 'Notifications'
+        }
+      })
+      let notifications = user.Notifications
+
+      for(let notification of notifications){
+        if(groupId === notification.groupId){
+          let group = await Group.findByPk(groupId)
+    
+          if(group){
+            await group.addUser(user)
+
+            await notification.destroy()
+
+            updateYourNotifs(user.username)
+            sendGroupNotif(user.username)
+
+            sendResponse(res, {
+              message: `Pridružili ste se grupi ${group.anem}.`
+            })
+          } else {
+            sendError(res, 'Ta grupa ne postoji.', 400)
+          }
+          break
+        }
+      }
+      sendError(res, 'Neočekivana greška', 500)
+    } catch(e) {
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  }
+
+
   //TODO i tek onda nakon GroupMessagess
 }

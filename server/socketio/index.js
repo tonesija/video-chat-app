@@ -21,6 +21,19 @@ function sendFriendNotif(username) {
     }
 }
 
+function sendGroupNotif(username) {
+    console.log("Sending new group notification to: ", username)
+
+    let reciverId = getUserId(username)
+    if(reciverId){
+        let message = {
+        }
+        innerIo.to(reciverId).emit('newGroup', message)
+    } else {
+        console.log('Failed to find a reciver.')
+    }
+}
+
 function sendNotif(username) {
     console.log("Sending notification to: ", username)
 
@@ -52,6 +65,7 @@ function updateYourNotifs(username) {
 //https://socket.io/docs/v3/emit-cheatsheet/index.html
 module.exports = {
     sendFriendNotif: sendFriendNotif,
+    sendGroupNotif: sendGroupNotif,
     sendNotif: sendNotif,
     updateYourNotifs: updateYourNotifs,
     initializeIo: io => {
