@@ -2,7 +2,6 @@ const {User, Notification, Group, GroupChatMessage, GroupMembers} = require('../
 
 const {sendResponse, sendError, printMethods} = require('../util')
 const {sendGroupNotif, sendNotif, updateYourNotifs} = require('../socketio')
-const {jwtVerifyUser} = require('../authentication')
 
 function createGroupRequest(sender, group) {
   return {
@@ -37,20 +36,12 @@ async function getGroups(user) {
 
 module.exports = {
   async createGroup(req, res) {
-    let token = req.body.token
     let groupName = req.body.groupName
-
     try{
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
 
       let newGroup = createGroup(groupName)
       newGroup = await Group.create(newGroup)
-      user = await User.findOne({where: {username: user.username}})
       await user.addGroup(newGroup)
       await newGroup.addUser(user)
       printMethods(newGroup)
@@ -65,18 +56,10 @@ module.exports = {
     }
   },
   async deleteGroup(req, res) {
-    let token = req.body.token
     let groupName = req.body.groupName
-
     try{
-      let user = jwtVerifyUser(token)
+      let user = req.body.authenticatedUser
 
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
-
-      user = await User.findOne({where: {username: user.username}})
       let group = await Group.findOne({where: {
         creatorId: user.id,
         name: groupName
@@ -97,18 +80,10 @@ module.exports = {
     }
   },
   async getGroups(req, res) {
-    let token = req.body.token
-
     try{
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
 
       let groups = await getGroups(user)
-      console.log(groups)
       sendResponse(res, {
         groups: groups
       })
@@ -118,16 +93,9 @@ module.exports = {
     }
   },
   async getGroupMembers(req, res) {
-    let token = req.body.token
     let groupId = req.body.groupId
-
     try{
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
 
       let group = await Group.findByPk(groupId)
       let members = await group.getUsers()
@@ -141,18 +109,11 @@ module.exports = {
     }
   },
   async sendGroupRequest(req, res) {
-    let token = req.body.token
     let groupId = req.body.groupId
     let reciver = req.body.reciver
-    console.log(reciver)
-
     try{
-      let user = jwtVerifyUser(token)
+      let user = req.body.authenticatedUser
 
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
       if(user.username === reciver){
         sendError(res, 'Ne možete dodati sebe u grupu.', 400)
         return
@@ -180,27 +141,11 @@ module.exports = {
     }
   },
   async acceptGroupRequest (req, res) {
-    let token = req.body.token
     let groupId = req.body.groupId
-    
     try {
-      let user = jwtVerifyUser(token)
+      let user = req.body.authenticatedUser
 
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
-
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: Notification,
-          as: 'Notifications'
-        }
-      })
-      let notifications = user.Notifications
+      let notifications = await user.getNotifications()
 
       for(let notification of notifications){
         if(groupId === notification.groupId){

@@ -1,8 +1,7 @@
 const {User, Notification} = require('../models')
 
-const {sendResponse, sendError} = require('../util')
+const {sendResponse, sendError, printMethods} = require('../util')
 const {sendFriendNotif, sendNotif, updateYourNotifs} = require('../socketio')
-const {jwtVerifyUser} = require('../authentication')
 
 function createFriendRequest(sender) {
   return {
@@ -29,16 +28,9 @@ async function createFriendAccept(user, sender) {
 
 module.exports = {
   async readNotification(req, res) {
-    let token = req.body.token
     let notifID = req.body.notifID
-
     try{
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
       
       user = await User.findOne({
         where: {
@@ -52,7 +44,7 @@ module.exports = {
           }
         }
       })
-      let notifications = user.Notifications
+      let notifications = await user.getNotifications()
       if(notifications.length != 1){
         sendError(res, 'Neočekivana greška', 500)
         return
@@ -70,33 +62,15 @@ module.exports = {
     }
   },
   async removeNotifcation(req, res) {
-    let token = req.body.token
     let notifID = req.body.notifID
-
-    console.log(notifID)
-
     try{
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
       
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: Notification,
-          as: 'Notifications',
-          where:{
-            id: notifID
-          }
+      let notifications = await user.getNotifications({
+        where:{
+          id: notifID
         }
       })
-      let notifications = user.Notifications
-      console.log(notifications)
       if(notifications.length != 1){
         sendError(res, 'Neočekivana greška', 500)
         return
@@ -115,26 +89,10 @@ module.exports = {
 
 
   async getNotifications(req, res) {
-    let token = req.body.token
-
     try{
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
       
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: Notification,
-          as: 'Notifications'
-        }
-      })
-      let notifications = user.Notifications
+      let notifications = await user.getNotifications()
 
       sendResponse(res, {
         notifications: notifications
@@ -145,31 +103,16 @@ module.exports = {
     }
   },
   async sendFriendRequest(req, res) {
-    let token = req.body.token
     let otherUsername = req.body.otherUsername
-
     try{
-      let user = jwtVerifyUser(token)
+      let user = req.body.authenticatedUser
 
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
       if(user.username === otherUsername){
         sendError(res, 'Ne možete dodati sebe za prijatelja.', 400)
         return
       }
       
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: User,
-          as: 'Friend'
-        }
-      })
-      let friends = user.Friend
+      let friends = await user.getFriend()
       for(let friend of friends){
         if(friend.username === otherUsername){
           sendError(res, 'Taj korisnik vam je već prijatelj.', 400)
@@ -182,7 +125,6 @@ module.exports = {
           username: otherUsername
         }
       })
-      console.log(user)
 
       if(otherUser){
         let notification = await Notification.create(createFriendRequest(user))
@@ -200,28 +142,11 @@ module.exports = {
     }
   },
   async acceptFriendRequest (req, res) {
-    let token = req.body.token
     let otherUsername = req.body.otherUsername
-    
     try {
-      let user = jwtVerifyUser(token)
+      let user = req.body.authenticatedUser
 
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
-
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: Notification,
-          as: 'Notifications'
-        }
-      })
-      let notifications = user.Notifications
-      console.log(notifications)
+      let notifications = await user.getNotifications()
       for(let notification of notifications){
         if(otherUsername === notification.otherUserUsername){
           let otherUser = await User.findOne({

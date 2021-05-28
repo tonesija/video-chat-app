@@ -1,8 +1,7 @@
 const {User} = require('../models')
 
-const {sendResponse, sendError, formatUser} = require('../util')
-const {sendFriendNotif} = require('../socketio')
-const {jwtSingUser, jwtVerifyUser} = require('../authentication')
+const {sendResponse, sendError, formatUser, printMethods} = require('../util')
+const {jwtSingUser} = require('../authentication')
 
 module.exports = {
   async register (req, res) {
@@ -72,126 +71,30 @@ module.exports = {
 
   async automaticLogin (req, res) {
     let token = req.body.token
-
     try {
-      console.log('token: ', token)
-      let user = jwtVerifyUser(token)
-
-      user = await User.findOne({where: {
-        username: user.username
-      }})
-
-      if(user){
-        sendResponse(res, {
-          user: formatUser(user),
-          token: token
-        })
-        return
-      } else {
-        sendError(res, 'Greška u automatskoj autentifikaciji.', 400)
-        return
-      }
+      let user = req.body.authenticatedUser
+      console.log(user)
+      sendResponse(res, {
+        user: formatUser(user),
+        token: token
+      })
     } catch(e){
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }
   },
-
-  async addFriend (req, res) {
-    let token = req.body.token
-    let otherUsername = req.body.otherUsername
-    
-    if(!token){
-      sendError(res, 'Greška u autentifikaciji.', 400)
-      return
-    }
-    
-    try {
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
-
-      if(user.username === otherUsername){
-        sendError(res, 'Ne možete dodati sebe za prijatelja.', 400)
-        return
-      }
-
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: User,
-          as: 'Friend'
-        }
-      })
-      let friends = user.Friend
-
-      for(let friend of friends){
-        if(friend.username === otherUsername){
-          sendError(res, 'Taj korisnik vam je već prijatelj.', 400)
-          return
-        }
-      }
-
-      let otherUser = await User.findOne({
-        where: {
-          username: otherUsername
-        }
-      })
-
-      if(otherUser){
-        await user.addFriend(otherUser)
-        await otherUser.addFriend(user)
-        sendResponse(res, {
-          message: `${otherUsername} je sada vaš prijatelj.`
-        })
-
-        sendFriendNotif(otherUsername)
-      } else {
-        sendError(res, 'Taj korisnik ne postoji.', 400)
-      }
-      
-    } catch(e) {
-      console.log(e)
-      sendError(res, 'Neočekivana greška', 500)
-    }
-  },
-
   async getFriends (req, res) {
-    let token = req.body.token
-    
-    if(!token){
-      sendError(res, 'Greška u autentifikaciji.', 400)
-      return
-    }
-    
     try {
-      let user = jwtVerifyUser(token)
-
+      let user = req.body.authenticatedUser
       if(!user){
         sendError(res, 'Greška u autentifikaciji.', 400)
         return
       }
-
-      user = await User.findOne({
-        where: {
-          username: user.username
-        },
-        include: {
-          model: User,
-          as: 'Friend'
-        }
-      })
-      let friends = user.Friend
+      let friends = await user.getFriend()
 
       sendResponse(res, {
         friends: friends
       })
-      
     } catch(e) {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
@@ -220,36 +123,15 @@ module.exports = {
 
   async setTheme(req, res) {
     let theme = req.body.theme
-    let token = req.body.token
-
-    console.log("Postavlam temu korisniku", theme)
-
-    if(!token){
-      sendError(res, 'Greška u autentifikaciji.', 400)
-      return
-    }
-
     try {
-      let user = jwtVerifyUser(token)
+      let user = req.body.authenticatedUser
 
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
-
-      user = await User.findOne({
-        where: {
-          username: user.username
-        }
-      })  
       user.theme = theme
       await user.save()
 
-      console.log("Tema uspjesno postavljena")
       sendResponse(res, {
         message: 'Uspješno postavljena nova tema'
       })
-
     } catch(e) {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
@@ -257,28 +139,8 @@ module.exports = {
   },
 
   async setNewProfileImg(req, res) {
-    let token = req.body.token
-
-    console.log('Postavljam novu sliku korisniku')
-
-    if(!token){
-      sendError(res, 'Greška u autentifikaciji.', 400)
-      return
-    }
-
     try {
-      let user = jwtVerifyUser(token)
-
-      if(!user){
-        sendError(res, 'Greška u autentifikaciji.', 400)
-        return
-      }
-
-      user = await User.findOne({
-        where: {
-          username: user.username
-        }
-      })
+      let user = req.body.authenticatedUser
 
       //postavi mu put
       let imgName = req.files['img'][0].filename
@@ -289,7 +151,6 @@ module.exports = {
         message: 'Profilna slika uspješno postavljena',
         path: user.imgPath
       })
-
     } catch(e) {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
