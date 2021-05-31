@@ -34,7 +34,7 @@ async function authentication(req, res, next){
     }})
 
     req.body.authenticatedUser = user
-    console.log('Postvaljen autentifficiran korisnik:', user)
+    console.log('Postvaljen autentificiran korisnik:', user)
 
     next()
   }catch(e){
