@@ -68,12 +68,12 @@ export default {
         try {
           let data = (await authServ.automaticLogin({token})).data
 
-          console.log(data.user.imgPath)
           //postavi korisnika u vuex
           this.$store.dispatch('setUser', {
             creds: {username: data.user.username,
               email: data.user.email,
-              theme: data.user.theme},
+              theme: data.user.theme,
+              id: data.user.id},
             token: data.token,
             imgPath: data.user.imgPath,
             Vuetify: this.$vuetify

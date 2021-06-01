@@ -2,6 +2,7 @@
   <v-container class="group" v-if="group">
     <h1>{{group.name}}</h1>
     <GroupMembers :group="group"></GroupMembers>
+    <GroupMenu :group="group"></GroupMenu>
 
     <ChatMsgs></ChatMsgs>
     <ChatInput></ChatInput>
@@ -12,6 +13,7 @@
 import ChatMsgs from '../components/ChatMessages'
 import ChatInput from '../components/ChatInput'
 import GroupMembers from '../components/GroupMembers'
+import GroupMenu from '../components/GroupMenu'
 
 import groupService from '../services/groupService'
 export default {
@@ -49,7 +51,8 @@ export default {
   components: {
     ChatInput,
     ChatMsgs,
-    GroupMembers
+    GroupMembers,
+    GroupMenu
   }
 }
 </script>

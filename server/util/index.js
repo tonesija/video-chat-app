@@ -20,6 +20,7 @@ function removeSpaces(str) {
 //formatiraj korisnika za odgovor (ukloni lozinku)
 function formatUser(user){
   return {
+    id: user.id,
     username: user.username,
     email: user.email,
     imgPath: user.imgPath,

@@ -101,7 +101,8 @@ export default {
         //postavi korisnika u vuex
         this.$store.dispatch('setUser', {
           creds: {username: data.user.username,
-          email: data.user.email},
+          email: data.user.email,
+          id: data.user.id},
           imgPath: data.user.imgPath,
           token: data.token
         })

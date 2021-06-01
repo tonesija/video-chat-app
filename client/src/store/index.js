@@ -10,6 +10,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    id: null,
     username: null,
     email: null,
     imgPath: null,
@@ -27,11 +28,13 @@ export default new Vuex.Store({
         state.isLoggedIn = true
         state.username = creds.username
         state.email = creds.email
+        state.id = creds.id
       } else {
         state.isLoggedIn = false
         state.username = null
         state.email = null
         state.imgPath = null
+        state.id = null
       }
     },
 

@@ -50,7 +50,7 @@ module.exports = {
       })
     }catch(e){
       console.log(e)
-      sendError(res, 'Grupa s tim imenom već postoji.', 500)
+      sendError(res, 'Grupa s tim imenom već postoji.', 400)
     }
   },
   async deleteGroup(req, res) {

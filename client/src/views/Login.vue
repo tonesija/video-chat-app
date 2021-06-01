@@ -89,7 +89,8 @@ export default {
         this.$store.dispatch('setUser', {
           creds: {username: data.user.username,
                   email: data.user.email,
-                  theme: data.user.theme},
+                  theme: data.user.theme,
+                  id: data.user.id},
           token: data.token,
           imgPath: data.user.imgPath,
           Vuetify: this.$vuetify

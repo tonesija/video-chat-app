@@ -27,11 +27,45 @@
               <v-list-item-title class="caption">
                   {{m.username}}
               </v-list-item-title>
+              <v-btn v-show="group.creatorId == $store.state.id
+                && $store.state.id != m.id"
+                icon small color="red lighten-2"
+                @click="propmtRemoveUserDialog(m.username)">
+                <v-icon>mdi-close-circle</v-icon>
+              </v-btn>
             </v-list-item>
           </v-list>
         </v-container>
       </v-menu>
     </v-row>
+
+    <v-dialog
+      v-model="removeMemberDialog"
+      persistent
+      max-width="290"
+    >
+      <v-card>
+        <v-card-title class="headline" style="word-break: normal;">
+          Ukloniti korisnika {{memberToRemove}}?
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="accent"
+            @click="removeMemberDialog=false"
+          >
+            Odustani
+          </v-btn>
+          <v-btn
+            depressed
+            @click="removeMember"
+          >
+            Ukloni
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
 
   </v-container>
 </template>
@@ -41,7 +75,10 @@ import groupService from '../services/groupService'
 export default {
   data:() => {
     return {
-      groupMembers: []
+      groupMembers: [],
+
+      removeMemberDialog: false,
+      memberToRemove: null
     }
   },
 
@@ -65,6 +102,16 @@ export default {
         console.log(e)
       }
     },
+
+    async removeMember(){
+
+      this.removeMemberDialog = false
+      this.memberToRemove = null
+    },
+    async propmtRemoveUserDialog(username){
+      this.memberToRemove = username
+      this.removeMemberDialog = true
+    }
   },
 
   created: function(){

@@ -114,6 +114,13 @@ export default {
     }
   },
 
+  watch:{
+    $route (to){
+      if(to.fullPath == '/')
+          this.getGroups()
+    }
+  },
+
   created: function(){
     this.getGroups()
   }
