@@ -44,15 +44,13 @@ module.exports = {
       newGroup = await Group.create(newGroup)
       await user.addGroup(newGroup)
       await newGroup.addUser(user)
-      printMethods(newGroup)
-      printMethods(user)
 
       sendResponse(res, {
         group: newGroup
       })
     }catch(e){
       console.log(e)
-      sendError(res, 'Neočekivana greška', 500)
+      sendError(res, 'Grupa s tim imenom već postoji.', 500)
     }
   },
   async deleteGroup(req, res) {
@@ -107,7 +105,7 @@ module.exports = {
         return
       }
       let members = await group.getUsers()
-
+      console.log(members)
       for(let member of members){
         if(member.id === user.id){
           sendResponse(res, {
@@ -116,7 +114,7 @@ module.exports = {
           return
         }
       }
-      
+
       sendError(res, "Niste član te grupe.", 400)
     }catch(e){
       console.log(e)

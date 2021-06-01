@@ -39,7 +39,10 @@ module.exports = (sequelize, DataTypes) => {
   })
 
   const Group = sequelize.define('Group', {
-    name: DataTypes.STRING
+    name: {
+      type: DataTypes.STRING,
+      unique: true
+    }
   })
 
   const GroupMembers = sequelize.define('GroupMembers')
