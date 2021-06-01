@@ -92,6 +92,37 @@ module.exports = {
       sendError(res, 'Neočekivana greška', 500)
     }
   },
+  async getGroup(req, res) {
+    let groupName = req.body.groupName
+    try{
+      let user = req.body.authenticatedUser
+
+      let group = await Group.findOne({
+        where: {
+          name: groupName
+        }
+      })
+      if(!group){
+        sendError(res, "Ta grupa ne postoji.", 400)
+        return
+      }
+      let members = await group.getUsers()
+
+      for(let member of members){
+        if(member.id === user.id){
+          sendResponse(res, {
+            group: group
+          })
+          return
+        }
+      }
+      
+      sendError(res, "Niste član te grupe.", 400)
+    }catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
   async getGroupMembers(req, res) {
     let groupId = req.body.groupId
     try{

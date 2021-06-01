@@ -68,6 +68,10 @@ module.exports = (app) => {
         AuthMiddlware.authentication,
         GroupController.getGroups
     )
+    app.post('/getGroup', 
+        AuthMiddlware.authentication,
+        GroupController.getGroup
+    )
     app.post('/getGroupMembers', 
         AuthMiddlware.authentication,
         GroupController.getGroupMembers

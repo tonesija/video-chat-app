@@ -9,6 +9,7 @@ import Index from '../views/Index.vue'
 import Chat from '../views/Chat.vue'
 import Call from '../views/Call.vue'
 import Settings from '../views/Settings.vue'
+import Group from '../views/Group.vue'
 
 
 Vue.use(VueRouter)
@@ -58,6 +59,11 @@ const routes = [
     path: '/room/:roomName',
     name: 'Room',
     component: Room
+  },
+  {
+    path: '/group/:groupName',
+    name: 'Group',
+    component: Group
   },
   {
     path: '/about',
