@@ -58,49 +58,10 @@
 
         <v-row align="center" justify="center" 
             v-show="$store.state.isLoggedIn">
-            <v-menu offset-y :close-on-content-click="false"
-                rounded="lg">
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn
-                    color="accent"
-                    v-bind="{attrs: attrs, size: size}"
-                    v-on="on"
-                    small
-                    >
-                    Dodaj prijatelja
-                    </v-btn>
-                </template>
-                <v-container class="primary lighten-1">
-                    <v-layout row class="py-2 px-2" justify-space-between align-center>
-                        <v-flex xs9>
-                            <v-text-field class=""
-                                dense placeholder="Korisničko ime"
-                                single-line v-model="newFriendUsername">
-
-                            </v-text-field>
-                        </v-flex>
-                        <v-flex xs3>
-                            <v-btn icon class="accent ml-3"
-                            @click="addFriend" fab small>
-                                <v-icon color="white">mdi-plus</v-icon>
-                            </v-btn>
-                        </v-flex>
-                            
-                    </v-layout>
-                    <v-row justify="center">
-                        <v-alert
-                            transition="fade-transition"
-                            border="left"
-                            v-show="message"
-                            dense
-                            :type="alertType"
-                            class="caption"
-                        >
-                            {{ message }}
-                        </v-alert>
-                    </v-row> 
-                </v-container>
-            </v-menu>
+            <CreationInput :title="'Dodaj prijatelja'"
+                :placeholder="'Korisničko ime'" @add="addFriend"
+                v-model="newFriendUsername" :errorType="alertType"
+                :error="message"></CreationInput>
         </v-row>
     </v-container>
     <v-container slot="append">
@@ -118,6 +79,7 @@
 <script>
 import FService from '../services/friendsService'
 import Groups from './Groups'
+import CreationInput from './CreationInput'
     export default {
         data() {
             return {
@@ -271,7 +233,8 @@ import Groups from './Groups'
             }
         },
         components:{
-            Groups
+            Groups,
+            CreationInput
         }
     }
 </script>

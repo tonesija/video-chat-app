@@ -25,7 +25,11 @@ const upload = multer({
 
 var cpUpload = upload.fields([{name: 'img', maxCount: 1}, 
               {name: 'token', maxCount: 1}])
+var cpUploadGroup = upload.fields([{name: 'img', maxCount: 1}, 
+              {name: 'token', maxCount: 1},
+              {name: 'groupId', maxCount: 1}])
 
 module.exports = {
-  cpUpload
+  cpUpload,
+  cpUploadGroup
 }

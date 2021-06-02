@@ -1,52 +1,69 @@
 <template>
-  <v-container>   
-    <v-row align="center" justify="center" >
-      <v-menu offset-y :close-on-content-click="false"
-          rounded="lg">
-        <template v-slot:activator="{on, attrs}">
-            <v-btn color="accent"
-            v-bind="{attrs: attrs}" v-on="on" small>
-            GroupMenu
-            </v-btn>
-        </template>
-        <v-container class="pa-0 ma-0">
-          <v-list class="primary" width="100%">
-            <v-list-item v-show="group.creatorId == userId">
-                <v-menu offset-x left :close-on-content-click="false">
-                  <template v-slot:activator="{on, attrs}">
-                    <v-btn color="secondary" depressed
-                      v-bind="{attrs: attrs}" v-on="on" small>
+  <v-menu offset-y :close-on-content-click="false"
+      rounded="lg">
+    <template v-slot:activator="{on, attrs}">
+        <v-btn color="accent"
+        v-bind="{attrs: attrs}" v-on="on" large icon>
+        <v-icon>mdi-dots-vertical</v-icon>
+        </v-btn>
+    </template>
+    <v-container class="pa-0 ma-0">
+      <v-list class="white" width="100%">
+        <v-list-item>
+            <v-menu offset-x left :close-on-content-click="false">
+              <template v-slot:activator="{on, attrs}">
+              <v-list-item v-bind="{attrs: attrs}" v-on="on" 
+                class="ma-0 pa-0">
+                  <v-list-item-action>
+                      <v-icon>mdi-account-plus</v-icon>
+                  </v-list-item-action>
+                  <v-list-item-title>
                       Pozovi člana
-                    </v-btn>
-                  </template>
-                  <h1>inv member go here</h1>
-                </v-menu>
-            </v-list-item>
-            <v-list-item v-show="group.creatorId == userId">
-              <v-btn color="secondary" depressed small
-                @click="deleteGroup">
-                Izbriši grupu
-              </v-btn>
-            </v-list-item>
-            <v-list-item v-show="group.creatorId != userId">
-              <v-btn color="secondary" depressed small>
-                Izađi iz grupe
-              </v-btn>
-            </v-list-item>
-          </v-list>
-        </v-container>
-      </v-menu>
-    </v-row>
+                  </v-list-item-title>
+              </v-list-item>
+              </template>
+              <CreationInputBox :placeholder="'Korisničko ime'"
+                v-model="newGroupMemberUsername" :error="newGroupMemberError"
+                :errorType="newGroupMemberAlertType" @add="addNewMember">
+              </CreationInputBox>
+            </v-menu>
+        </v-list-item>
+        <v-list-item v-show="group.creatorId == userId"
+          @click="deleteGroup">
+          <v-list-item-action>
+              <v-icon>mdi-trash-can</v-icon>
+          </v-list-item-action>
+          <v-list-item-title>
+              Izbriši grupu
+          </v-list-item-title>
+        </v-list-item>
+        <v-list-item v-show="group.creatorId != userId"
+          @click="leaveGroup">
+          <v-list-item-action>
+              <v-icon>mdi-logout-variant</v-icon>
+          </v-list-item-action>
+          <v-list-item-title>
+              Izađi iz grupe
+          </v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-container>
+  </v-menu>
 
-  </v-container>
 </template>
 
 <script>
+import CreationInputBox from './CreationInputBox'
+
 import groupService from '../services/groupService'
 export default {
   data:() => {
     return {
-      userId: null
+      userId: null,
+
+      newGroupMemberUsername: null,
+      newGroupMemberError: null,
+      newGroupMemberAlertType: null
     }
   },
 
@@ -68,11 +85,36 @@ export default {
       }catch(e){
         console.log(e)
       }
+    },
+
+    async leaveGroup(){
+      try{
+        await groupService.leaveGroup(this.group.id)
+        this.$router.push('/')
+      }catch(e){
+        console.log(e)
+      }
+    },
+
+    async addNewMember(){
+      try {
+        await groupService.sendGroupRequest(this.group.id
+          , this.newGroupMemberUsername)
+        this.newGroupMemberAlertType = 'success'
+        this.newGroupMemberError = 'Posan zahtjev korisniku.'
+      } catch(e){
+        this.newGroupMemberAlertType = 'error'
+        this.newGroupMemberError = e.response.data.message
+      }
     }
   },
 
   created: function(){
     this.userId = this.$store.state.id
+  },
+
+  components:{
+    CreationInputBox
   }
 }
 </script>

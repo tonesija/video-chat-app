@@ -33,6 +33,7 @@
 
 <script>
 import notificationService from '../services/notificationService'
+import groupService from '../services/groupService'
 
 export default {
   data:()=>{
@@ -59,10 +60,10 @@ export default {
     },
 
     async acceptGroupRequest(){
-      //let groupId = this.notification.groupId
+      let groupId = this.notification.groupId
       try{
-        //TODO
-        //await notificationService.acceptFriend(otherUsername)
+        let data = (await groupService.acceptGroupRequest(groupId)).data
+        this.$router.push('/group/'+data.group.name)
       } catch(e){
         console.log(e)
       }

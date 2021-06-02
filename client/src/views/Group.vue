@@ -1,12 +1,33 @@
 <template>
-  <v-container class="group" v-if="group">
-    <h1>{{group.name}}</h1>
-    <GroupMembers :group="group"></GroupMembers>
-    <GroupMenu :group="group"></GroupMenu>
+  <div class="home" v-if="group">
+    <v-toolbar class="primary">
+      <v-avatar size="42" class="mr-2" v-if="group && group.imgPath">
+        <img :src="`${baseUrl}${group.imgPath}`"/>
+      </v-avatar>
+      <v-toolbar-title class="accent--text font-weight-bold">
+        {{group.name}}
+      </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-toolbar-items>
+        <v-btn icon @click="enterCall" class="accent--text">
+          <v-icon large>mdi-phone</v-icon>
+        </v-btn>
+      </v-toolbar-items>
+
+      <v-toolbar-items>
+        <GroupMembers :group="group"></GroupMembers>
+      </v-toolbar-items>
+
+      <v-toolbar-items>
+        <GroupMenu :group="group"></GroupMenu>
+      </v-toolbar-items>
+    </v-toolbar>
 
     <ChatMsgs></ChatMsgs>
     <ChatInput></ChatInput>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -23,6 +44,12 @@ export default {
     }
   },
 
+  computed: {
+    baseUrl () {
+      return process.env.VUE_APP_ENV_BASE_URL
+    }
+  },
+
   methods: {
     async loadGroup(){
       try {
@@ -32,6 +59,10 @@ export default {
       } catch(e){
         console.log(e)
       }
+    },
+
+    async enterCall(){
+      console.log('TODO')
     }
   },
 

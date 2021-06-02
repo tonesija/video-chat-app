@@ -4,7 +4,7 @@ const NotificationController = require('../controllers/NotificationsController')
 const GroupController = require('../controllers/GroupController')
 
 const AuthMiddlware = require('../authentication')
-const {cpUpload} = require('../storage')
+const {cpUpload, cpUploadGroup} = require('../storage')
 
 module.exports = (app) => {
     app.post('/register',
@@ -68,6 +68,14 @@ module.exports = (app) => {
         AuthMiddlware.authentication,
         GroupController.getGroups
     )
+    app.post('/removeMember', 
+        AuthMiddlware.authentication,
+        GroupController.removeMember
+    )
+    app.post('/leaveGroup', 
+        AuthMiddlware.authentication,
+        GroupController.leaveGroup
+    )
     app.post('/getGroup', 
         AuthMiddlware.authentication,
         GroupController.getGroup
@@ -83,6 +91,11 @@ module.exports = (app) => {
     app.post('/acceptGroupRequest',
         AuthMiddlware.authentication, 
         GroupController.acceptGroupRequest
+    )
+    app.post('/newProfileImgGroup',
+        cpUploadGroup,
+        AuthMiddlware.authentication,
+        GroupController.setNewProfileImg
     )
 
     app.post('/getMessages',

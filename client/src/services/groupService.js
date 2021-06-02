@@ -17,6 +17,14 @@ export default {
     let token = localStorage.getItem('token')
     return api().post('/deleteGroup', {token, groupName})
   },
+  async leaveGroup(groupId){
+    let token = localStorage.getItem('token')
+    return api().post('/leaveGroup', {token, groupId})
+  },
+  async removeMember(groupId, member){
+    let token = localStorage.getItem('token')
+    return api().post('/removeMember', {token, groupId, member})
+  },
   async getGroupMembers(groupId){
     let token = localStorage.getItem('token')
     return api().post('/getGroupMembers', {token, groupId})
@@ -28,5 +36,8 @@ export default {
   async acceptGroupRequest(groupId){
     let token = localStorage.getItem('token')
     return api().post('/acceptGroupRequest', {token, groupId})
+  },
+  async setNewProfileImg(fd){
+    return api().post('/sendGroupRequest', fd)
   },
 }

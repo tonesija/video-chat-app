@@ -28,55 +28,19 @@
       </v-list>
     </v-row>
 
-      <v-row align="center" justify="center" >
-      <v-menu offset-y :close-on-content-click="false"
-          rounded="lg">
-        <template v-slot:activator="{on, attrs}">
-            <v-btn
-            color="accent"
-            v-bind="{attrs: attrs}"
-            v-on="on"
-            small
-            >
-            Stvori novu grupu
-            </v-btn>
-        </template>
-        <v-container class="primary lighten-1">
-          <v-layout row class="py-2 px-2" justify-space-between align-center>
-            <v-flex xs9>
-              <v-text-field class=""
-                  dense placeholder="Ime grupe"
-                  single-line v-model="newGroupName">
-              </v-text-field>
-            </v-flex>
-            <v-flex xs3>
-                <v-btn icon class="accent ml-3"
-                @click="createNewGroup" fab small>
-                    <v-icon color="white">mdi-plus</v-icon>
-                </v-btn>
-            </v-flex>
-                
-        </v-layout>
-        <v-row justify="center">
-            <v-alert
-                transition="fade-transition"
-                border="left"
-                v-show="newGroupMsg"
-                dense
-                :type="newGroupAlertType"
-                class="caption"
-            >
-                {{ newGroupMsg }}
-            </v-alert>
-          </v-row> 
-        </v-container>
-      </v-menu>
+    <v-row align="center" justify="center">
+      <CreationInput :title="'Stvori novu grupu'"
+        :placeholder="'Ime grupe'" @add="createNewGroup"
+        v-model="newGroupName" :errorType="newGroupAlertType"
+        :error="newGroupMsg"></CreationInput>
     </v-row>
 
   </v-container>
 </template>
 
 <script>
+import CreationInput from './CreationInput'
+
 import groupService from '../services/groupService'
 export default {
   data:() => {
@@ -116,13 +80,17 @@ export default {
 
   watch:{
     $route (to){
-      if(to.fullPath == '/')
-          this.getGroups()
+      if(to.fullPath == '/' || to.fullPath.startsWith('/group'))
+        this.getGroups()
     }
   },
 
   created: function(){
     this.getGroups()
+  },
+
+  components: {
+    CreationInput
   }
 }
 </script>

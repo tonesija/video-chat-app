@@ -1,43 +1,46 @@
 <template>
-  <v-container>   
-    <v-row align="center" justify="center" >
-      <v-menu offset-y :close-on-content-click="false"
-          rounded="lg">
-        <template v-slot:activator="{on, attrs}">
-            <v-btn color="accent"
-            v-bind="{attrs: attrs}" v-on="on" small>
-            Članovi
+  <v-menu offset-y :close-on-content-click="false"
+      rounded="lg" @input="getGroupMembers">
+    <template v-slot:activator="{on, attrs}">
+        <v-btn color="accent"
+        v-bind="{attrs: attrs}" v-on="on" large icon>
+        <v-icon>mdi-account-group</v-icon>
+        </v-btn>
+    </template>
+    <v-container class="pa-0 ma-0">
+      <v-list class="primary" width="100%">
+        <v-list-item class="pa-0 ma-0" dense
+          v-for="m in groupMembers" :key="m.id">
+          <v-list-item-action>
+            <div>
+              <v-avatar size="32" v-if="m.imgPath">
+                  <img v-if="m.imgPath" 
+                      :src="`${baseUrl}${m.imgPath}`"/>
+              </v-avatar>
+              <v-avatar size="32" v-if="!m.imgPath"
+                  color="secondary">
+              </v-avatar>
+            </div>
+          </v-list-item-action>
+          <v-list-item-title class="caption">
+              {{m.username}}
+          </v-list-item-title>
+          <v-menu offset-x right :close-on-content-click="false">
+            <template v-slot:activator="{on, attrs}">
+            <v-btn icon small color="secondary"
+              v-bind="{attrs: attrs}" v-on="on">
+              <v-icon>mdi-dots-vertical</v-icon></v-btn>
+            </template>
+            <v-btn v-show="group.creatorId == $store.state.id
+              && $store.state.id != m.id" small
+              @click="propmtRemoveUserDialog(m.username)">
+              Ukloni korisnika
             </v-btn>
-        </template>
-        <v-container class="pa-0 ma-0">
-          <v-list class="primary" width="100%">
-            <v-list-item class="pa-0 ma-0" dense
-              v-for="m in groupMembers" :key="m.id">
-              <v-list-item-action>
-                <div>
-                  <v-avatar size="32" v-if="m.imgPath">
-                      <img v-if="m.imgPath" 
-                          :src="`${baseUrl}${m.imgPath}`"/>
-                  </v-avatar>
-                  <v-avatar size="32" v-if="!m.imgPath"
-                      color="secondary">
-                  </v-avatar>
-                </div>
-              </v-list-item-action>
-              <v-list-item-title class="caption">
-                  {{m.username}}
-              </v-list-item-title>
-              <v-btn v-show="group.creatorId == $store.state.id
-                && $store.state.id != m.id"
-                icon small color="red lighten-2"
-                @click="propmtRemoveUserDialog(m.username)">
-                <v-icon>mdi-close-circle</v-icon>
-              </v-btn>
-            </v-list-item>
-          </v-list>
-        </v-container>
-      </v-menu>
-    </v-row>
+          </v-menu>
+
+        </v-list-item>
+      </v-list>
+    </v-container>
 
     <v-dialog
       v-model="removeMemberDialog"
@@ -65,9 +68,8 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+  </v-menu>
 
-
-  </v-container>
 </template>
 
 <script>
@@ -104,7 +106,8 @@ export default {
     },
 
     async removeMember(){
-
+      await groupService.removeMember(this.group.id
+      , this.memberToRemove)
       this.removeMemberDialog = false
       this.memberToRemove = null
     },

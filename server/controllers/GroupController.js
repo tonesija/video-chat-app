@@ -2,6 +2,7 @@ const {User, Notification, Group, GroupChatMessage, GroupMembers} = require('../
 
 const {sendResponse, sendError, printMethods} = require('../util')
 const {sendGroupNotif, sendNotif, updateYourNotifs} = require('../socketio')
+const { getRoomUsers } = require('../socketio/users')
 
 function createGroupRequest(sender, group) {
   return {
@@ -19,6 +20,7 @@ function createGroup(groupName) {
   }
 }
 
+//----- POMOĆNE METODE -----
 //TODO popravi ovo pls
 async function getGroups(user) {
   let groups = await GroupMembers.findAll({
@@ -33,7 +35,6 @@ async function getGroups(user) {
   return toReturn
 }
 
-
 module.exports = {
   async createGroup(req, res) {
     let groupName = req.body.groupName
@@ -42,8 +43,10 @@ module.exports = {
 
       let newGroup = createGroup(groupName)
       newGroup = await Group.create(newGroup)
+      newGroup.imgPath = 'default-profile-group.png'
       await user.addGroup(newGroup)
       await newGroup.addUser(user)
+      await newGroup.save()
 
       sendResponse(res, {
         group: newGroup
@@ -124,13 +127,58 @@ module.exports = {
   async getGroupMembers(req, res) {
     let groupId = req.body.groupId
     try{
-      let user = req.body.authenticatedUser
-
       let group = await Group.findByPk(groupId)
       let members = await group.getUsers()
         
       sendResponse(res, {
         members: members
+      })
+    }catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+  async removeMember(req, res) {
+    let groupId = req.body.groupId
+    let member = req.body.member
+    try{
+      let user = req.body.authenticatedUser
+
+      let group = await Group.findByPk(groupId)
+      if(user.id != group.creatorId){
+        sendError(res, 'Niste vlasnik grupe.', 400)
+        return
+      }
+      let members = await group.getUsers()
+      for(let m of members){
+        if(m.username == member){
+          await group.removeUser(m)
+          sendResponse(res, {
+            message: 'Korisnik je izbačen iz grupe.'
+          })
+          return
+        }
+      }
+      sendError(res, 'Taj korisnik nije u grupi.', 400)
+    }catch(e){
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
+  },
+  async leaveGroup(req, res) {
+    let groupId = req.body.groupId
+    try{
+      let user = req.body.authenticatedUser
+
+      let group = await Group.findByPk(groupId)
+      if(user.id == group.creatorId){
+        await group.destroy()
+      } else {
+        await group.removeUser(user)
+      }
+        
+      sendResponse(res, {
+        message: 'Napustili ste grupu.'
       })
     }catch(e){
       console.log(e)
@@ -188,12 +236,13 @@ module.exports = {
             sendGroupNotif(user.username)
 
             sendResponse(res, {
-              message: `Pridružili ste se grupi ${group.name}.`
+              message: `Pridružili ste se grupi ${group.name}.`,
+              group: group
             })
           } else {
             sendError(res, 'Ta grupa ne postoji.', 400)
           }
-          break
+          return
         }
       }
       sendError(res, 'Neočekivana greška', 500)
@@ -201,7 +250,26 @@ module.exports = {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }
+  },
+  async setNewProfileImg(req, res) {
+    let groupId = req.body.groupId
+    try {
+      //postavi mu put
+      let imgName = req.files['img'][0].filename
+      let group = await Group.findByPk(groupId)    
+      group.imgPath = `profile-images/${imgName}`
+      await group.save()
+
+      sendResponse(res, {
+        message: 'Profilna slika uspješno postavljena',
+        path: group.imgPath
+      })
+    } catch(e) {
+      console.log(e)
+      sendError(res, 'Neočekivana greška', 500)
+    }
   }
+
 
 
   //TODO i tek onda nakon GroupMessagess

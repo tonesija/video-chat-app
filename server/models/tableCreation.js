@@ -42,7 +42,8 @@ module.exports = (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       unique: true
-    }
+    },
+    imgPath: DataTypes.STRING
   })
 
   const GroupMembers = sequelize.define('GroupMembers')
