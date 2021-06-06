@@ -97,6 +97,14 @@ module.exports = (app) => {
         AuthMiddlware.authentication,
         GroupController.setNewProfileImg
     )
+    app.post('/getGroupChatMessages', 
+        AuthMiddlware.authentication,
+        GroupController.getMessages
+    )
+    app.post('/sendGroupChatMessage', 
+        AuthMiddlware.authentication,
+        GroupController.sendMessage
+    )
 
     app.post('/getMessages',
         ChatController.getMessages

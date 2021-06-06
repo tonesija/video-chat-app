@@ -220,19 +220,17 @@ module.exports = {
     
     
             // --- room logic ---
-            /*socket.on('join-room', ({roomName, username}) => {
-                console.log(username + ' joined room ' + roomName)
-                
-                const user = userJoin(socket.id, username, roomName)
-                socket.join(roomName)
-    
-                socket.broadcast.to(roomName).emit('userJoinedRoom', user)
-    
-                //socket.broadcast.to(roomName).emit('roomUsers', getRoomUsers(roomName))
-                io.to(roomName).emit('roomUsers', getRoomUsers(roomName))
+            socket.on('join-room', ({groupId}) => {
+                console.log('user joined group')
+                socket.join(groupId)    
+            })
+
+            socket.on('new-group-message', ({groupId, msg}) => {
+                console.log('new-group-message')
+                io.to(groupId).emit('newGroupMessage', msg)   
             })
     
-            socket.on('user-joined-call', ({username}) => {
+            /*socket.on('user-joined-call', ({username}) => {
                 console.log('User joined call: ', username)
                 const user = getUser(socket.id)
                 socket.broadcast.emit('userJoinedCall', user)

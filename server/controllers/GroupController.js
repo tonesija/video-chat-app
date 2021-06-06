@@ -1,8 +1,6 @@
 const {User, Notification, Group, GroupChatMessage, GroupMembers} = require('../models')
-
 const {sendResponse, sendError, printMethods} = require('../util')
 const {sendGroupNotif, sendNotif, updateYourNotifs} = require('../socketio')
-const { getRoomUsers } = require('../socketio/users')
 
 function createGroupRequest(sender, group) {
   return {
@@ -254,7 +252,6 @@ module.exports = {
   async setNewProfileImg(req, res) {
     let groupId = req.body.groupId
     try {
-      //postavi mu put
       let imgName = req.files['img'][0].filename
       let group = await Group.findByPk(groupId)    
       group.imgPath = `profile-images/${imgName}`
@@ -268,9 +265,65 @@ module.exports = {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }
+  },
+  async sendMessage (req, res) {
+    let groupId = req.body.groupId
+    let content = req.body.content
+    let sender = req.body.authenticatedUser
+    try {
+      let group = await Group.findByPk(groupId)
+      if(!group){
+        sendError(res, 'Grupa ne postoji.', 400)
+        return
+      }
+
+      if(!await group.hasUser(sender)){
+        sendError(res, 'Niste član grupe.', 400)
+        return
+      }
+
+      let newMsg = await GroupChatMessage.create({
+        content: content,
+        GroupId: groupId,
+        UserId: sender.id
+      })
+      
+      sendResponse(res, {
+        message: 'Poruka uspješno poslana.',
+        chatMessage: newMsg
+      })
+    } catch (e) {
+      sendError(res, 'Neočekivana greška.', 500)
+    }
+  },
+  async getMessages(req, res){
+    let user = req.body.authenticatedUser
+    let groupId = req.body.groupId
+      try {
+        let group = await Group.findByPk(groupId)
+        if(!group){
+          sendError(res, 'Grupa ne postoji.', 400)
+          return
+        }
+        if(!await group.hasUser(user)){
+          sendError(res, 'Niste član grupe.', 400)
+          return
+        }
+
+        let msgs = await group.getGroupChatMessages({
+          include:{
+            model: User,
+            as: 'User'
+          }
+        })
+        
+        sendResponse(res, {
+          message: 'Poruke uspješno dohvaćene.',
+          chatMessages: msgs
+        })
+      } catch (e) {
+        console.log(e)
+        sendError(res, 'Neočekivana greška.', 500)
+      }
   }
-
-
-
-  //TODO i tek onda nakon GroupMessagess
 }

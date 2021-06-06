@@ -40,4 +40,12 @@ export default {
   async setNewProfileImg(fd){
     return api().post('/sendGroupRequest', fd)
   },
+  async sendMessage(groupId, content){
+    let token = localStorage.getItem('token')
+    return api().post('/sendGroupChatMessage', {token, groupId, content})
+  },
+  async getMessages(groupId){
+    let token = localStorage.getItem('token')
+    return api().post('/getGroupChatMessages', {token, groupId})
+  },
 }

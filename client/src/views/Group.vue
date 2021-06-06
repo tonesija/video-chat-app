@@ -25,13 +25,14 @@
       </v-toolbar-items>
     </v-toolbar>
 
-    <ChatMsgs></ChatMsgs>
-    <ChatInput></ChatInput>
+    <ChatMsgs style="max-height: 650px" ref="chat-msgs"
+      class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
+    <ChatInput v-model="newMessage" @messageSent="sendMessage"></ChatInput>
   </div>
 </template>
 
 <script>
-import ChatMsgs from '../components/ChatMessages'
+import ChatMsgs from '../components/GroupChatMessages'
 import ChatInput from '../components/ChatInput'
 import GroupMembers from '../components/GroupMembers'
 import GroupMenu from '../components/GroupMenu'
@@ -40,7 +41,9 @@ import groupService from '../services/groupService'
 export default {
   data(){
     return {
-      group: null
+      group: null,
+      messages: [],
+      newMessage: null
     }
   },
 
@@ -63,11 +66,67 @@ export default {
 
     async enterCall(){
       console.log('TODO')
+    },
+
+    async getMessages(){
+      try{
+        let data = (await groupService.getMessages(
+          this.group.id
+        )).data
+        this.messages = data.chatMessages
+        console.log(this.messages)
+        this.scrollToBottom('chat-msgs')
+      }catch(e){
+        console.log(e)
+      }
+    },
+
+    async sendMessage(){
+      if(!this.newMessage) return
+      this.newMessage = this.newMessage.trim()
+      if(this.newMessage === '') return
+
+      this.scrollToBottom('chat-msgs')
+
+      try{
+        let data = (await groupService.sendMessage(
+          this.group.id,
+          this.newMessage
+        )).data
+        data.chatMessage.User = {}
+        data.chatMessage.User.username = this.$store.state.username
+        this.$socket.client.emit('new-group-message', {
+          sender: this.$store.state.username,
+          groupId: this.group.id,
+          msg: data.chatMessage
+        })
+        console.log(data.chatMessage)
+        this.newMessage = null
+      }catch(e){
+        console.log(e)
+      }
+    },
+
+    scrollToBottom(ref){
+      setTimeout(() => {
+        this.$refs[ref].$el.scrollTop = this.$refs[ref].$el.scrollHeight
+      }, 50)
     }
   },
 
+  sockets: {
+    newGroupMessage: async function(msg) {
+      console.log('dobijena poruka preko socketa: ', msg)
+      this.messages.push(msg)
+      this.scrollToBottom('chat-msgs')
+    }
+  },
+
+
   created: async function(){
-    this.loadGroup()
+    this.loadGroup().then(()=>{
+      this.getMessages()
+    })
   },
 
   watch:{

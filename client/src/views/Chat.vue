@@ -108,7 +108,7 @@ export default {
         sender: this.$store.state.username,
         reciver: this.otherUsername,
         msg: msg
-        })
+      })
 
       this.newMessage = null
 

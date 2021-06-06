@@ -59,6 +59,14 @@ export default {
         let data = (await groupService.getGroups())
         this.groups = data.data.groups
         console.log(this.groups)
+
+        //join-room event
+        for(let group of this.groups){
+          this.$socket.client.emit('join-room', {
+            groupId: group.id
+          })
+        }
+        
       } catch(e){
         console.log(e)
       }
