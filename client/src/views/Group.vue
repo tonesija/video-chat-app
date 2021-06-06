@@ -65,7 +65,7 @@ export default {
     },
 
     async enterCall(){
-      console.log('TODO')
+      this.$router.push('/group-call/'+this.group.id)
     },
 
     async getMessages(){

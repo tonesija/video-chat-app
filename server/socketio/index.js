@@ -219,7 +219,7 @@ module.exports = {
             })
     
     
-            // --- room logic ---
+            // ------- Group chat logic -------
             socket.on('join-room', ({groupId}) => {
                 console.log('user joined group')
                 socket.join(groupId)    
@@ -229,34 +229,59 @@ module.exports = {
                 console.log('new-group-message')
                 io.to(groupId).emit('newGroupMessage', msg)   
             })
-    
-            /*socket.on('user-joined-call', ({username}) => {
-                console.log('User joined call: ', username)
-                const user = getUser(socket.id)
-                socket.broadcast.emit('userJoinedCall', user)
+
+            // ------- WebRTC group call signaling -------
+            socket.on('user-joined-call', ({username, groupId}) => {
+                let room = groupId+'call'
+                socket.join(room)
+                console.log('User joined call: ', username, groupId)
+                socket.to(room).emit('userJoinedCall', username)
             })
-    
-            socket.on('get-rooms', () => {
-                socket.emit('rooms', rooms)
-            })
-            
-            socket.on('get-room-users', (room) => {
-                let users = getRoomUsers(room)
-    
-                socket.broadcast.to(room).emit('roomUsers', users)
-            })
-    
-            socket.on('leave-room', room => {
-                const user = userLeave(socket.id)
-    
-                if(user) {
-                    io.to(user.room).emit('userDisconnected', user)
-                    socket.broadcast.to(room).emit('roomUsers', getRoomUsers(user.room))
-                    console.log(user.username + ' left room ' + room)
+
+            socket.on('offer-group', ({offer, reciver, sender, groupId}) => {
+                console.log('Offer event', reciver)
+                let reciverId = getUserId(reciver)
+                if(reciverId){
+                    let message = {
+                        offer: offer,
+                        sender: sender,
+                        reciver: reciver
+                    }
+                    io.to(reciverId).emit('messageGroup', message)
                 } else {
-                    console.log('Someone disconnected!')
+                    console.log('Failed to find a reciver.')
                 }
-            })*/
+            })
+            socket.on('answer-group', ({answer, reciver, sender, groupId}) => {
+                console.log('Answer event', reciver)
+                let reciverId = getUserId(reciver)
+                if(reciverId){
+                    let message = {
+                        answer: answer,
+                        sender: sender,
+                        reciver: reciver
+                    }
+                    io.to(reciverId).emit('messageGroup', message)
+                } else {
+                    console.log('Failed to find a reciver.')
+                }
+            })
+            socket.on('new-ice-candidate-group', ({candidate, reciver, sender, groupId}) => {
+                console.log('New ICE candidate event', reciver)
+                let reciverId = getUserId(reciver)
+                if(reciverId){
+                    let message = {
+                        candidate: candidate,
+                        sender: sender,
+                        reciver: reciver
+                    }
+                    io.to(reciverId).emit('messageGroup', message)
+                } else {
+                    console.log('Failed to find a reciver.')
+                }
+            })
+
+
             socket.on('disconnect', function() {
                 const user = userLeave(socket.id)
                 console.log('user:', user)
@@ -268,8 +293,6 @@ module.exports = {
                     console.log('Someone disconnected!')
                 }
             })
-    
-            //--- ROOM CALL SIGNALING LOGIC ---    
         })
     }
 }

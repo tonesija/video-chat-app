@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import VideoChat from '../views/VideoChat.vue'
-import Room from '../views/Room.vue'
+import GroupCall from '../views/GroupCall.vue'
 import Register from '../views/Register'
 import Login from '../views/Login'
 import Index from '../views/Index.vue'
@@ -56,9 +56,9 @@ const routes = [
     component: Login
   },
   {
-    path: '/room/:roomName',
-    name: 'Room',
-    component: Room
+    path: '/group-call/:groupId',
+    name: 'GroupCall',
+    component: GroupCall
   },
   {
     path: '/group/:groupName',

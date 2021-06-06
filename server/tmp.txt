@@ -1,0 +1,23 @@
+socket.on('offer-group', ({offer, groupId}) => {
+                console.log('Offer event', groupId)
+                let message = {
+                    offer: offer
+                }
+                socket.to(groupId).emit('message', message)
+            })
+    
+            socket.on('answer', ({answer, groupId}) => {
+                console.log('Answer event', groupId)
+                let message = {
+                    answer: answer
+                }
+                socket.to(groupId).emit('message', message)
+            })
+    
+            socket.on('new-ice-candidate', ({candidate, groupId}) => {
+                console.log('New ICE candidate event', reciver)
+                let message = {
+                    candidate: candidate
+                }
+                socket.to(groupId).emit('message', message)
+            }) 
