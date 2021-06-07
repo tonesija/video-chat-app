@@ -84,8 +84,6 @@ export default {
       this.newMessage = this.newMessage.trim()
       if(this.newMessage === '') return
 
-      this.scrollToBottom('chat-msgs')
-
       try{
         let data = (await groupService.sendMessage(
           this.group.id,
@@ -120,7 +118,6 @@ export default {
     }
   },
 
-
   created: async function(){
     this.loadGroup().then(()=>{
       this.getMessages()
@@ -136,7 +133,6 @@ export default {
       }
     }
   },
-
 
   components: {
     ChatInput,

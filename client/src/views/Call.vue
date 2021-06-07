@@ -68,7 +68,6 @@ export default {
 
       videoStream: null,
       remoteVideoStream: null,
-
       
       iceCandidates: [],
       iceConfiguration: {
@@ -89,9 +88,7 @@ export default {
 
       otherUsername: null,
       otherUser: null,
-      volume: 50,
-
-      cameraSender: null
+      volume: 50
     }
   },
 
@@ -198,7 +195,7 @@ export default {
           //add camera track and prepare for renegotiation
           stream.getTracks().forEach(track => {
             this.videoStream.addTrack(track)
-            this.cameraSender = this.pc.addTrack(track, this.videoStream)
+            this.pc.addTrack(track, this.videoStream)
             console.log('Adding track to peer connection!')
           })
       })
@@ -258,7 +255,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-</style>

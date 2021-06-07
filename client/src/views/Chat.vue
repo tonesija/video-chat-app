@@ -20,9 +20,7 @@
         
       <ChatMsgs style="max-height: 650px" ref="chat-msgs"
         class="overflow-y-auto mb-3" :messages="messages"></ChatMsgs>
-        
       <ChatInput v-model="newMessage" @messageSent="sendMessage"></ChatInput>
-
 
       <v-dialog
         v-model="dialog"
@@ -45,8 +43,6 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-    
-      
     </v-container>
   </div>
 </template>
@@ -102,7 +98,6 @@ export default {
         id: Math.random() * 10000000,
         createdAt: new Date()
       }
-      this.scrollToBottom('chat-msgs')
 
       this.$socket.client.emit('new-message', {
         sender: this.$store.state.username,
@@ -203,8 +198,6 @@ export default {
 
   created: function() {
     this.onLoad()
-
-    //document.addEventListener('keydown', this.onKeyPress)
   },
 
   //on route change
@@ -218,11 +211,8 @@ export default {
   },
 
   destroyed: function() {
-    document.removeEventListener('keydown', this.onKeyPress)
     clearInterval(this.dotInterval)
   },
-
-
 
   components: {
     ChatMsgs,

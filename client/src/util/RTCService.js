@@ -81,12 +81,29 @@ function onNegotiationNeeded(pc, reciver, socket){
   pc.addEventListener('negotiationneeded', handler)
 }
 
+function onNegotiationNeededGroup(pcs, socket, sender){
+  console.log(pcs)
+  for(let [username, pc] of pcs){
+    console.log(username, pc)
+    let handler = async (event) => {
+      console.log('NEGOTIATION NEEDED', event)
+      let newOffer = await pc.createOffer()
+      await pc.setLocalDescription(newOffer)
+      socket.emit('offer-group', {offer: newOffer, 
+        reciver: username, sender: sender})
+      pc.removeEventListener('negotiationneeded', handler)
+    }
+    console.log('neg needed for', username)
+    pc.addEventListener('negotiationneeded', handler)
+  }
+}
+
 function setupNewPc(pc, sender, reciver, socket){
   pc.onicecandidate = function(event){
     console.log('Got an ice candidate for: ', reciver)
     console.log('pcstop', pc.stop)
     if (event.candidate) {
-        socket.emit('new-ice-candidate', {candidate: event.candidate,
+        socket.emit('new-ice-candidate-group', {candidate: event.candidate,
           sender: sender, reciver: reciver})
     }
   }
@@ -94,18 +111,21 @@ function setupNewPc(pc, sender, reciver, socket){
 
 
 function myOnTrack(reciver, pc, remoteVideoStreams){
-  //get the remote stream
   pc.addEventListener('track', async (event) => {
     console.log('Got a track from ', reciver)
-    let rvs = videoContains(reciver, remoteVideoStreams)
-    if(rvs){
-      rvs.mediaStream.addTrack(event.track, rvs.mediaStream)
-    } else {
-      let newMediaStream = new MediaStream()
-      newMediaStream.addTrack(event.track, newMediaStream)
-      let remoteStream = {username: reciver, mediaStream: newMediaStream}
-      remoteVideoStreams.push(remoteStream)
-    }
+    let flag = false
+    remoteVideoStreams.forEach(rv => {
+      if(rv.username === reciver){
+        console.log('adding track to existing rv')
+        rv.mediaStream.addTrack(event.track, rv.mediaStream)
+        flag = true
+      }
+    })
+    if(flag) return
+    let newMediaStream = new MediaStream()
+    newMediaStream.addTrack(event.track, newMediaStream)
+    let remoteStream = {username: reciver, mediaStream: newMediaStream}
+    remoteVideoStreams.push(remoteStream)
   })
 }
 
@@ -147,6 +167,7 @@ exports.oneIceConnectionChange = oneIceConnectionChange
 exports.onMessageIceCandidate = onMessageIceCandidate
 exports.onTrack = onTrack
 exports.onNegotiationNeeded = onNegotiationNeeded
+exports.onNegotiationNeededGroup = onNegotiationNeededGroup
 
 exports.myOnTrack = myOnTrack
 exports.setupNewPc = setupNewPc

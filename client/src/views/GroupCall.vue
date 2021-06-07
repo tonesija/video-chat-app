@@ -1,17 +1,49 @@
 <template>
-  <div class="room">
+  <v-container class="height100">
     <h1>{{$route.params.groupId}}</h1>
+    <v-row align="center" justify="center"
+      v-for="remoteVideoStream in remoteVideoStreams"
+        :key="remoteVideoStream.username">
+      <v-menu offset-y :close-on-content-click="false"
+      rounded="lg" bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <video
+          :srcObject.prop="remoteVideoStream.mediaStream" autoplay 
+          playsinline :controls="false"
+          width="640" height="480"
+          v-bind="{attrs: attrs}"
+          v-on="on" :volume="0.0"
+          >
+          </video>
+        </template>
+        <v-layout row justify-center class="primary lighten-3 px-2 pb-0 ma-0">
+          <v-flex class="pa-0 ma-0">
+            <p class="subtitle mb-0">{{remoteVideoStream.username}}</p>
+            <v-slider v-model="volume" @change="changeVolume"
+            dense>
+            </v-slider>
+          </v-flex>
+        </v-layout>
+      </v-menu>
+    </v-row>
 
-    <video :srcObject.prop="videoStream" autoplay 
-    playsinline controls="false"></video>
-
-    <div>
-      <video  v-for="remoteVideoStream in remoteVideoStreams"
-        :key="remoteVideoStream.username"
-        :srcObject.prop="remoteVideoStream.mediaStream" autoplay 
-        playsinline controls="false">
-      </video>
-    </div>
+    <v-row align="center" justify="center">
+      <v-menu offset-y :close-on-content-click="false"
+      rounded="lg" bottom>
+      <template v-slot:activator="{ on, attrs }">
+          <video :srcObject.prop="videoStream" autoplay 
+          playsinline  muted :controls="false"
+          width="300" height="260"
+          v-bind="{attrs: attrs}"
+          v-on="on"
+          >
+          </video>
+      </template>
+        <v-container class="primary lighten-3">
+          <p class="subtitle">{{ $store.state.username }}</p>
+        </v-container>
+      </v-menu>
+    </v-row>
     
     <v-list dense>
       <v-list-item v-for="user in users" :key="user.id">
@@ -25,10 +57,17 @@
           </v-list-item-content>
       </v-list-item>
     </v-list>
-  </div>
+
+    <CallFooter v-on:hangUp="hangUp()"
+      v-on:cameraSwitch="manageCamera"
+      @micSwitch="manageMic">
+    </CallFooter>
+  </v-container>
 </template>
 
 <script>
+import CallFooter from '../components/CallFooter'
+
 import RTCService from '../util/RTCService'
 export default {
   data: ()=> {
@@ -44,6 +83,7 @@ export default {
       },
 
       videoStream: null,
+      volume: 50,
 
       remoteVideoStreams: [],
 
@@ -62,6 +102,17 @@ export default {
     }
   },
 
+  computed: {
+    volumeAdj: function(){
+      return this.volume/100
+    },
+    otherImgUrl () {
+      if (this.otherUser)
+        return process.env.VUE_APP_ENV_BASE_URL+'/'+this.otherUser.imgPath
+      else return null
+    }
+  },
+
   methods: {
     async joinCall(){
       //create pcs map
@@ -71,7 +122,7 @@ export default {
         {username: this.localUsername, groupId: this.$route.params.groupId})
 
       //onMessageIceCandidate
-      this.$socket.$subscribe('messageGroup', async (message) => {
+      this.$socket.client.on('messageGroup', async (message) => {
         if (message.candidate && message.reciver === this.localUsername) {
           try {
             console.log('Addin ice candidate to peer connection, sender: '+message.sender+', reciver: '+message.reciver)
@@ -83,7 +134,7 @@ export default {
       })
       
       //--- on answer ---
-      this.$socket.$subscribe('messageGroup', async (message) => {
+      this.$socket.client.on('messageGroup', async (message) => {
         if (message.answer && message.reciver === this.localUsername) {
           console.log('Got an answer from ', message.sender)
           const remoteDesc = new RTCSessionDescription(message.answer)
@@ -94,7 +145,7 @@ export default {
       })
 
       //--- on offer ---
-      this.$socket.$subscribe('messageGroup', async (message) => {
+      this.$socket.client.on('messageGroup', async (message) => {
         if(message.offer && message.reciver === this.localUsername){
           console.log('Got an offer from', message.sender)
           let pc = new RTCPeerConnection(this.iceConfiguration)
@@ -103,7 +154,6 @@ export default {
           RTCService.setLocalStream(pc, this.videoStream)
           RTCService.myOnTrack(message.sender, pc, this.remoteVideoStreams)
           RTCService.setupNewPc(pc, this.localUsername, message.sender, this.$socket.client)
-
           RTCService.myOnConnChange(pc)
 
           await pc.setRemoteDescription(new RTCSessionDescription(message.offer))
@@ -111,10 +161,50 @@ export default {
           const answer = await pc.createAnswer()
 
           await pc.setLocalDescription(answer)
-          this.$socket.client.emit('answer', {answer: answer,
+          this.$socket.client.emit('answer-group', {answer: answer,
             sender: this.localUsername, reciver: message.sender})
         }
       })
+    },
+
+    manageMic(on){
+      if(on)
+        this.videoStream.getAudioTracks()[0].enabled = true
+      else 
+        this.videoStream.getAudioTracks()[0].enabled = false
+    },
+    manageCamera(on){
+      if(on)
+        this.turnOnCamera()
+      else
+        this.videoStream.getVideoTracks()[0].enabled = false
+    },
+    turnOnCamera(){
+      if(this.videoStream.getVideoTracks().length != 0){
+        this.videoStream.getVideoTracks()[0].enabled = true
+        return
+      }
+      RTCService.onNegotiationNeededGroup(this.pcs,
+        this.$socket.client, this.localUsername)
+      navigator.mediaDevices.getUserMedia({video:true})
+      .then(stream => {
+        console.log('Got MediaStream:', stream)
+        //add camera track and prepare for renegotiation
+        stream.getTracks().forEach(track => {
+          this.videoStream.addTrack(track)
+          for(let [username, pc] of this.pcs){
+            console.log(username)
+            pc.addTrack(track, this.videoStream)
+          }
+          console.log('Adding track to peer connection!')
+        })
+      })
+    },
+    changeVolume(){
+      this.$refs['otherVideo'].volume = this.volumeAdj
+    },
+    hangUp(){
+      this.$router.go(-1)
     }
   },
 
@@ -126,9 +216,7 @@ export default {
       this.pcs.set(username, pc)
 
       RTCService.myOnTrack(username, pc, this.remoteVideoStreams)
-
       RTCService.setupNewPc(pc, this.localUsername, username, this.$socket.client)
-      
       RTCService.myOnConnChange(pc)
 
       //create offer
@@ -152,15 +240,37 @@ export default {
     this.groupId = this.$route.params.groupId
 
     //ask for camera and mic access
-    navigator.mediaDevices.getUserMedia(this.constraints)
+    navigator.mediaDevices.getUserMedia({audio:true})
     .then(stream => {
         this.videoStream = stream
+        this.joinCall()
     })
     .catch(error => {
         console.error('Error accessing media devices.', error)
     })
+  },
 
-    this.joinCall()
+  watch: {
+    remoteVideoStreams: {
+      deep: true,
+      handler(){
+        console.log('dadaSDFDSFDSFSDFksdmfksdfIDDSFNOD')
+        this.$forceUpdate()
+      }
+    }
+  },
+
+  destroyed: function() {
+    console.log('cleaning')
+    this.$socket.client.off('messageGroup')
+    //turn off mic and camera
+    this.videoStream.getTracks().forEach(track => {
+      track.stop()
+    })
+  },
+
+  components: {
+    CallFooter
   }
 }
 </script>
