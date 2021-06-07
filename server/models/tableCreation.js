@@ -1,3 +1,26 @@
+const Promise = require('bluebird')
+const bcrypt = Promise.promisifyAll(require('bcrypt-nodejs'))
+
+function hashPassword (user) {
+  console.log('HASHING PASSWORD')
+  const SALT_FACTOR = 8
+  if(!user.changed('password')){
+    console.log('ipak ne hashiran')
+    return
+  }
+  return bcrypt
+    .genSaltAsync(SALT_FACTOR)
+    .then(salt => bcrypt.hashAsync(user.password, salt, null))
+    .then(hash => {
+      user.setDataValue('password', hash)
+    })
+}
+
+function comparePassword(password) {
+  console.log(password, this.password)
+  return bcrypt.compareAsync(password, this.password)
+}
+
 module.exports = (sequelize, DataTypes) => {
   //------ STVARANJE MODELA ------
   const User = sequelize.define('User', {
@@ -10,7 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       unique: true
     },
     imgPath: DataTypes.STRING,
-    password: DataTypes.STRING,
+    password: DataTypes.STRING(61),
     theme: DataTypes.BOOLEAN
   }, {timestamps: false})
 
@@ -63,6 +86,13 @@ module.exports = (sequelize, DataTypes) => {
 
   Group.hasMany(GroupChatMessage)
   GroupChatMessage.belongsTo(User)
+
+  //------ ZA HASHIRANJE LOZINKE USERA ------
+  
+
+  User.addHook("beforeCreate", hashPassword)
+  User.addHook("beforeUpdate", hashPassword)
+  User.prototype.comparePassword = comparePassword
 
   //------ STAVLJANJE U EXPORT POLJE ------
   const tables = []

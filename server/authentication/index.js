@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const config = require('../config')
-
 const {User} = require('../models')
 
 //vraća jwt
@@ -14,6 +13,8 @@ function jwtSingUser (dbUser) {
 function jwtVerifyUser (token) {
   return jwt.verify(token, config.authentication.jwtSecret)
 }
+
+
 
 //middleware za autentifikaciju
 //postavlja body.authenticatedUser ili vraca
@@ -47,5 +48,5 @@ async function authentication(req, res, next){
 module.exports = {
   jwtSingUser,
   jwtVerifyUser,
-  authentication
+  authentication,
 }

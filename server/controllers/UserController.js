@@ -16,7 +16,9 @@ module.exports = {
 
     try {
       try {
-        let dbUser = await User.create(creds)
+        let dbUser = await User.create(creds, {
+          individualHooks: true
+        })
         dbUser.imgPath = 'default-profile.png'
         dbUser.theme = true
         await dbUser.save()
@@ -52,7 +54,8 @@ module.exports = {
         })
         
         //kasnije ce se koristiti bcrypt
-        if(!dbUser || dbUser.password !== creds.password) {
+        if(!dbUser || 
+          !(await dbUser.comparePassword(creds.password))) {
           sendError(res, 'Neispravno korisničko ime ili lozinka.', 400)
           return
         }
