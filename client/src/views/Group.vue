@@ -58,7 +58,6 @@ export default {
       try {
         let data = (await groupService.getGroup(this.$route.params.groupName)).data
         this.group = data.group
-        console.log(data)
       } catch(e){
         console.log(e)
       }
@@ -74,7 +73,6 @@ export default {
           this.group.id
         )).data
         this.messages = data.chatMessages
-        console.log(this.messages)
         this.scrollToBottom('chat-msgs')
       }catch(e){
         console.log(e)
@@ -100,7 +98,6 @@ export default {
           groupId: this.group.id,
           msg: data.chatMessage
         })
-        console.log(data.chatMessage)
         this.newMessage = null
       }catch(e){
         console.log(e)
@@ -116,9 +113,10 @@ export default {
 
   sockets: {
     newGroupMessage: async function(msg) {
-      console.log('dobijena poruka preko socketa: ', msg)
-      this.messages.push(msg)
-      this.scrollToBottom('chat-msgs')
+      if(msg.GroupId == this.group.id){
+        this.messages.push(msg)
+        this.scrollToBottom('chat-msgs')
+      }
     }
   },
 
@@ -132,7 +130,9 @@ export default {
   watch:{
     $route (to, from){
       if(to.name === from.name){
-        this.loadGroup()
+        this.loadGroup().then(()=>{
+          this.getMessages()
+        })
       }
     }
   },
