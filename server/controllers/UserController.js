@@ -155,5 +155,21 @@ module.exports = {
       console.log(e)
       sendError(res, 'Neočekivana greška', 500)
     }
+  },
+
+  async getImgByUsername(){
+    let username = req.params.username
+    console.log(username)
+    try {
+      let user = await User.findOne({
+        where:{
+          username: username
+        }
+      })
+      res.sendFile(user.imgPath)
+    } catch(e){
+      console.log(e)
+      sendError(res, 'Ta slika ne postoji', 404)
+    }
   }
 }

@@ -237,6 +237,12 @@ module.exports = {
                 console.log('User joined call: ', username, groupId)
                 socket.to(room).emit('userJoinedCall', username)
             })
+            socket.on('user-leave-group-call', ({username, groupId}) => {
+                let room = groupId+'call'
+                socket.leave(room)
+                console.log('User left group call: ', username, groupId)
+                socket.to(room).emit('userLeaveGroupCall', username)
+            })
 
             socket.on('offer-group', ({offer, reciver, sender, groupId}) => {
                 console.log('Offer event', reciver)

@@ -1,3 +1,4 @@
+
 async function makeCall(pc, socket){
   console.log('Making call')
   socket.on('message', async message => {
@@ -101,7 +102,6 @@ function onNegotiationNeededGroup(pcs, socket, sender){
 function setupNewPc(pc, sender, reciver, socket){
   pc.onicecandidate = function(event){
     console.log('Got an ice candidate for: ', reciver)
-    console.log('pcstop', pc.stop)
     if (event.candidate) {
         socket.emit('new-ice-candidate-group', {candidate: event.candidate,
           sender: sender, reciver: reciver})
@@ -117,14 +117,16 @@ function myOnTrack(reciver, pc, remoteVideoStreams){
     remoteVideoStreams.forEach(rv => {
       if(rv.username === reciver){
         console.log('adding track to existing rv')
-        rv.mediaStream.addTrack(event.track, rv.mediaStream)
+        rv.mediaStream.addTrack(event.track)
+        rv.key = reciver+Math.random()
         flag = true
+        return
       }
     })
     if(flag) return
     let newMediaStream = new MediaStream()
     newMediaStream.addTrack(event.track, newMediaStream)
-    let remoteStream = {username: reciver, mediaStream: newMediaStream}
+    let remoteStream = {key: reciver+Math.random(),username: reciver, mediaStream: newMediaStream}
     remoteVideoStreams.push(remoteStream)
   })
 }

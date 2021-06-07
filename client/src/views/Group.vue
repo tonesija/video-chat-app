@@ -1,9 +1,6 @@
 <template>
   <div class="home" v-if="group">
     <v-toolbar class="primary">
-      <v-avatar size="42" class="mr-2" v-if="group && group.imgPath">
-        <img :src="`${baseUrl}${group.imgPath}`"/>
-      </v-avatar>
       <v-toolbar-title class="accent--text font-weight-bold">
         {{group.name}}
       </v-toolbar-title>

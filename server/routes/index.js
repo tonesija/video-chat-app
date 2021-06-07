@@ -6,8 +6,11 @@ const GroupController = require('../controllers/GroupController')
 const AuthMiddlware = require('../authentication')
 const {cpUpload, cpUploadGroup} = require('../storage')
 
+const AuthPolicy = require('../policies/AuthentificationPolicy')
+
 module.exports = (app) => {
     app.post('/register',
+        AuthPolicy.register,
         UserController.register
     )
     app.post('/login',
@@ -54,6 +57,9 @@ module.exports = (app) => {
     )
     app.post('/getUser',
         UserController.getUser
+    )
+    app.get('/getImgByUsername',
+        UserController.getImgByUsername
     )
 
     app.post('/createGroup', 

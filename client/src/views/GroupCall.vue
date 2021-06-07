@@ -3,7 +3,7 @@
     <h1>{{$route.params.groupId}}</h1>
     <v-row align="center" justify="center"
       v-for="remoteVideoStream in remoteVideoStreams"
-        :key="remoteVideoStream.username">
+        :key="remoteVideoStream.key">
       <v-menu offset-y :close-on-content-click="false"
       rounded="lg" bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -12,7 +12,8 @@
           playsinline :controls="false"
           width="640" height="480"
           v-bind="{attrs: attrs}"
-          v-on="on" :volume="0.0"
+          v-on="on"
+          :poster="baseUrl+''+users.get(remoteVideoStream.username).imgPath"
           >
           </video>
         </template>
@@ -45,19 +46,6 @@
       </v-menu>
     </v-row>
     
-    <v-list dense>
-      <v-list-item v-for="user in users" :key="user.id">
-          <v-list-item-action>
-              <v-icon color="white">mdi-plus</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-              <v-list-item-title class="white--text caption">
-                  {{ user.username }}
-              </v-list-item-title>
-          </v-list-item-content>
-      </v-list-item>
-    </v-list>
-
     <CallFooter v-on:hangUp="hangUp()"
       v-on:cameraSwitch="manageCamera"
       @micSwitch="manageMic">
@@ -67,6 +55,7 @@
 
 <script>
 import CallFooter from '../components/CallFooter'
+import groupService from '../services/groupService'
 
 import RTCService from '../util/RTCService'
 export default {
@@ -74,7 +63,6 @@ export default {
     return {
       localUsername: null,
       groupId: null,
-      users: [],
       pcs: null,
 
       constraints: {
@@ -84,6 +72,8 @@ export default {
 
       videoStream: null,
       volume: 50,
+
+      users: null,
 
       remoteVideoStreams: [],
 
@@ -106,10 +96,8 @@ export default {
     volumeAdj: function(){
       return this.volume/100
     },
-    otherImgUrl () {
-      if (this.otherUser)
-        return process.env.VUE_APP_ENV_BASE_URL+'/'+this.otherUser.imgPath
-      else return null
+    baseUrl () {
+        return process.env.VUE_APP_ENV_BASE_URL
     }
   },
 
@@ -205,7 +193,19 @@ export default {
     },
     hangUp(){
       this.$router.go(-1)
-    }
+    },
+
+    async getGroupMembers(){
+      try {
+        let data = (await groupService.getGroupMembers(this.groupId)).data
+        for(let user of data.members){
+          this.users.set(user.username, user)
+        }
+      } catch(e){
+        console.log(e)
+      }
+    },
+
   },
 
   sockets: {
@@ -232,13 +232,23 @@ export default {
       this.$socket.client.emit('offer-group', 
         {offer: offer, sender: this.localUsername, reciver: username,
         groupId: this.groupId})
+    },
+    userLeaveGroupCall: async function(username){
+      this.pcs.delete(username)
+      let i
+      for(i=0; i<this.remoteVideoStreams.length; ++i){
+        if(this.remoteVideoStreams[i].username == username)
+          break
+      }
+      this.remoteVideoStreams.splice(i, 1)
     }
   },
 
   created: function() {
     this.localUsername = this.$store.state.username
     this.groupId = this.$route.params.groupId
-
+    this.users = new Map()
+    this.getGroupMembers()
     //ask for camera and mic access
     navigator.mediaDevices.getUserMedia({audio:true})
     .then(stream => {
@@ -250,19 +260,12 @@ export default {
     })
   },
 
-  watch: {
-    remoteVideoStreams: {
-      deep: true,
-      handler(){
-        console.log('dadaSDFDSFDSFSDFksdmfksdfIDDSFNOD')
-        this.$forceUpdate()
-      }
-    }
-  },
-
   destroyed: function() {
     console.log('cleaning')
     this.$socket.client.off('messageGroup')
+    this.$socket.client.emit('user-leave-group-call', {
+      username: this.localUsername, groupId: this.groupId
+    })
     //turn off mic and camera
     this.videoStream.getTracks().forEach(track => {
       track.stop()
