@@ -22,7 +22,7 @@
           elevation="8" outlined v-if="$store.state.isLoggedIn">
           <v-card-text>
             <p class="title secondary--text text-width">
-              {{$store.state.username}} dobrodošao nazad u
+              {{$store.state.username}} dobrodošao u
               <span class="secondary--text">
               Video<span class="font-weight-light">Chat</span></span>.
             </p>
