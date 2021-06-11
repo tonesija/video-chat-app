@@ -34,7 +34,6 @@ function onMessageOffer(pc, socket){
 
 function onIceCandidate(pc, socket, sender){
   pc.addEventListener('icecandidate', event => {
-      console.log('Got an ice candidate: ', event.candidate)
       if (event.candidate) {
           socket.emit('new-ice-candidate', {candidate: event.candidate, reciver: sender})
       }
@@ -43,7 +42,6 @@ function onIceCandidate(pc, socket, sender){
 
 function oneIceConnectionChange(pc){
   pc.addEventListener('iceconnectionstatechange', event => {
-      console.log('Ice connection state changed: ', pc.iceConnectionState)
       if (pc.iceConnectionState === 'connected') {
           console.log('Peers connected', event)
       }
@@ -53,9 +51,7 @@ function oneIceConnectionChange(pc){
 function onMessageIceCandidate(pc, socket){
   socket.on('message', async message => {
       if (message.iceCandidate) {
-          console.log('Got and ice candidate through message')
           try {
-          console.log('Addin ice candidate to peer connection')
           await pc.addIceCandidate(message.iceCandidate);
           } catch (e) {
           console.error('Error adding received ice candidate', e);
@@ -66,7 +62,6 @@ function onMessageIceCandidate(pc, socket){
 
 function onTrack(pc, remoteVideoStream){
   pc.addEventListener('track', async (event) => {
-      console.log('Got a track!!!')
       remoteVideoStream.addTrack(event.track, remoteVideoStream)
   })
 }

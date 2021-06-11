@@ -11,7 +11,6 @@ const storage = multer.diskStorage({
       cb(null, getFileName(file.originalname))
   },
   onError: (err, next) => {
-      console.log('FILE ALREADY WRITTEN, SKIPPING')
       next()
   }
 })

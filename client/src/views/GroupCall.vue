@@ -1,6 +1,5 @@
 <template>
   <v-container class="height100">
-    <h1>{{$route.params.groupId}}</h1>
     <v-row align="center" justify="center"
       v-for="remoteVideoStream in remoteVideoStreams"
         :key="remoteVideoStream.key">
@@ -37,6 +36,7 @@
           width="300" height="260"
           v-bind="{attrs: attrs}"
           v-on="on"
+          :poster="baseUrl+''+$store.state.imgPath"
           >
           </video>
       </template>

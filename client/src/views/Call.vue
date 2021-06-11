@@ -34,6 +34,7 @@
           width="300" height="260"
           v-bind="{attrs: attrs}"
           v-on="on"
+          :poster="baseUrl+''+$store.state.imgPath"
           >
           </video>
       </template>
@@ -88,23 +89,25 @@ export default {
 
       otherUsername: null,
       otherUser: null,
-      volume: 50
+      volume: 50,
+
+      mediaConstraints: {
+      'offerToReceiveAudio': true,
+      'offerToReceiveVideo': true    
+      }
     }
   },
 
   sockets: {
     message: async function(message) {
       if (message.offer) {
-        console.log('Got an offer')
         this.pc.setRemoteDescription(new RTCSessionDescription(message.offer));
         const answer = await this.pc.createAnswer();
         
         await this.pc.setLocalDescription(answer)
         this.$socket.client.emit('answer', {answer: answer, reciver: this.otherUsername})
       } else if (message.candidate) {
-        console.log('Got and ice candidate through message')
         try {
-        console.log('Addin ice candidate to peer connection')
         await this.pc.addIceCandidate(message.candidate);
         } catch (e) {
         console.error('Error adding received ice candidate', e);
@@ -129,26 +132,23 @@ export default {
       if (this.otherUser)
         return process.env.VUE_APP_ENV_BASE_URL+'/'+this.otherUser.imgPath
       else return null
+    },
+    baseUrl () {
+        return process.env.VUE_APP_ENV_BASE_URL
     }
   },
 
   methods: {
     async makeCall() {
       //RTCServickeCall(this.pc, this.socket)
-      console.log('Making call')
       this.$socket.client.on('message', async message => {
         if (message.answer) {
-          console.log('Got an answer')
           const remoteDesc = new RTCSessionDescription(message.answer)
           await this.pc.setRemoteDescription(remoteDesc)
         }
       })
-      var mediaConstraints = {
-      'offerToReceiveAudio': true,
-      'offerToReceiveVideo': true    
-      }
-
-      const offer = await this.pc.createOffer(mediaConstraints)
+      
+      const offer = await this.pc.createOffer(this.mediaConstraints)
       await this.pc.setLocalDescription(offer)
       this.$socket.client.emit('offer', {offer: offer, reciver: this.otherUsername})
     },

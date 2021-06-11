@@ -1,7 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import VideoChat from '../views/VideoChat.vue'
 import GroupCall from '../views/GroupCall.vue'
 import Register from '../views/Register'
 import Login from '../views/Login'
@@ -21,11 +19,6 @@ const routes = [
     component: Index
   },
   {
-    path: '/rooms',
-    name: 'Home',
-    component: Home
-  },
-  {
     path: '/chat/:username',
     name: 'Chat',
     component: Chat
@@ -39,11 +32,6 @@ const routes = [
     path: '/call/:username',
     name: 'Call',
     component: Call
-  },
-  {
-    path: '/video-chat',
-    name: 'VideoChatTest',
-    component: VideoChat
   },
   {
     path: '/register',

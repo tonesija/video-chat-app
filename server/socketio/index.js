@@ -93,10 +93,7 @@ module.exports = {
             })
     
             //--- WebRTC signaling ---
-            socket.on('offer', ({offer, reciver}) => {
-                console.log('Offer event', reciver)
-                
-    
+            socket.on('offer', ({offer, reciver}) => {                
                 let reciverId = getUserId(reciver)
                 if(reciverId){
                     let message = {

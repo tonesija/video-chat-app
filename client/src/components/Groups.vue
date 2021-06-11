@@ -19,11 +19,6 @@
           <v-list-item-title class="caption">
               {{g.name}}
           </v-list-item-title>
-          <v-icon 
-              color="accent"
-              fab >
-              mdi-numeric-9-circle
-          </v-icon>
         </v-list-item>
       </v-list>
     </v-row>
