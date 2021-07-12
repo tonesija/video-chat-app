@@ -4,10 +4,10 @@ Project was made for my bachelor's thesis.
 
 ## How to run localy
 1. In the client folder add a .env.development.local file containing:
-  VUE_APP_ENV_BASE_URL=http://127.0.0.1:7070/
-  VUE_APP_ENV_TURN=<turn server url>
-  VUE_APP_ENV_TURN_USERNAME=<turn server username>
-  VUE_APP_ENV_TURN_CREDENTIAL=<turn server password>
+  *VUE_APP_ENV_BASE_URL=http://127.0.0.1:7070/
+  *VUE_APP_ENV_TURN=<turn server url>
+  *VUE_APP_ENV_TURN_USERNAME=<turn server username>
+  *VUE_APP_ENV_TURN_CREDENTIAL=<turn server password>
 2. Open a terminal and run npm install in the client.
 3. Run npm run serve in the client to start the client proxy server.
 4. Open a terminal and run npm install in the server.
