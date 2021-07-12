@@ -8,6 +8,7 @@ Client
  * Axios
  * Socket.io
  * Vuex
+
 Server
  * Joi
  * JWT
