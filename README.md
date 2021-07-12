@@ -1,8 +1,22 @@
 # About
 Video chat web application using Vue, Express.js and WebRTC technology.
-Project was made for my bachelor's thesis.
+Project was made for my bachelor's thesis. Web app is deployed at https://video-chat3.herokuapp.com/#/.
 
-## How to run localy
+## Used modules
+Client
+ * Vuetify
+ * Axios
+ * Socket.io
+ * Vuex
+Server
+ * Joi
+ * JWT
+ * Multer
+ * Sequelize
+ * Socket.io
+ * Bcrypt
+
+## How to run locally
 1. In the client folder add a **.env.development.local** file containing:
   * VUE_APP_ENV_BASE_URL=http://127.0.0.1:7070/
   * VUE_APP_ENV_TURN=<turn server url>
